@@ -1,0 +1,8 @@
+node_modules/
+server/dev.sqlite3*
+
+# macOS
+.DS_Store
+
+# Local AI tooling (per-developer, not shared)
+.atl/

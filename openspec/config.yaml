@@ -1,0 +1,39 @@
+schema: spec-driven
+
+context: |
+  Multi-Tenant SaaS for Gastos Comunes (Enterprise-grade)
+  Backend: Node.js + Express + TypeScript, SQLite (better-sqlite3), Knex.js, Zod, JWT
+  Web: React + Vite + TypeScript, react-router-dom, axios, CSS Modules
+  Mobile: React Native + Expo + TypeScript, expo-secure-store
+  RBAC: superadmin > condo_admin > building_admin > resident
+  Architecture: Server routes→middlewares→controllers→services→repositories→db/migrations
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Consider multi-tenant data isolation implications
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+    - RBAC rules MUST specify role hierarchy
+  design:
+    - Include sequence diagrams for complex flows
+    - Document architecture decisions with rationale
+    - Multi-tenant isolation strategy MUST be explicit
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+  apply:
+    guidelines:
+      - Follow existing code patterns
+      - Server: routes→middlewares→controllers→services→repositories
+      - Web: components, pages, context, services
+      - Mobile: screens, navigation, api
+    tdd: false
+    test_command: ""
+  verify:
+    test_command: ""
+    build_command: ""
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas

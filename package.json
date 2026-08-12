@@ -1,0 +1,26 @@
+{
+  "name": "gestionpagos",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Multi-tenant platform for gastos comunes (condo fees) — server scaffold and data foundation",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "migrate:latest": "tsx ./node_modules/knex/bin/cli.js --knexfile ./server/db/knexfile.ts migrate:latest",
+    "migrate:rollback": "tsx ./node_modules/knex/bin/cli.js --knexfile ./server/db/knexfile.ts migrate:rollback",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.11.1",
+    "knex": "^3.1.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.0",
+    "@types/uuid": "^10.0.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
+}
