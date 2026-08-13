@@ -9,15 +9,27 @@
   "scripts": {
     "migrate:latest": "tsx ./node_modules/knex/bin/cli.js --knexfile ./server/db/knexfile.ts migrate:latest",
     "migrate:rollback": "tsx ./node_modules/knex/bin/cli.js --knexfile ./server/db/knexfile.ts migrate:rollback",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "dev": "tsx watch server/src/index.ts",
+    "start": "tsx server/src/index.ts"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.11.1",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "knex": "^3.1.0",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/better-sqlite3": "^7.6.12",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.10.0",
     "@types/uuid": "^10.0.0",
     "tsx": "^4.19.3",

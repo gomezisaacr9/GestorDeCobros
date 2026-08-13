@@ -1,6 +1,9 @@
 node_modules/
 server/dev.sqlite3*
 
+# Secrets — never commit .env
+.env
+
 # macOS
 .DS_Store
 
