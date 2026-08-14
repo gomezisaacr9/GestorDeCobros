@@ -21,25 +21,13 @@ function toPublic(row: UnitRow | UnitPublic): PublicUnit {
 export const unitController = {
   /** POST /api/v1/units — 201 + Location on success; 404/409 from domain errors. */
   async create(req: Request, res: Response): Promise<void> {
-    try {
-      const { number, building_id: buildingId } = req.body as {
-        number: string;
-        building_id: string;
-      };
-      const created = await unitService.create(number, buildingId);
-      res.setHeader('Location', `/api/v1/units/${created.id}`);
-      res.status(201).json(toPublic(created));
-    } catch (err) {
-      if (err instanceof NotFoundError) {
-        res.status(404).json({ error: err.message });
-        return;
-      }
-      if (err instanceof ConflictError) {
-        res.status(409).json({ error: err.message });
-        return;
-      }
-      throw err;
-    }
+    const { number, building_id: buildingId } = req.body as {
+      number: string;
+      building_id: string;
+    };
+    const created = await unitService.create(number, buildingId);
+    res.setHeader('Location', `/api/v1/units/${created.id}`);
+    res.status(201).json(toPublic(created));
   },
 
   /**

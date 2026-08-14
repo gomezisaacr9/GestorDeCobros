@@ -46,4 +46,10 @@ export const unitRepository = {
     const row = await connection('units').select('id').where({ id }).first();
     return row !== undefined;
   },
+
+  /** True when an active row with this number exists in the given building. */
+  async existsByNumber(number: string, buildingId: string): Promise<boolean> {
+    const row = await connection('units').select('id').where({ number, building_id: buildingId }).whereNull('deleted_at').first();
+    return row !== undefined;
+  },
 };

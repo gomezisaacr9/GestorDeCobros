@@ -29,8 +29,7 @@ export const unitService = {
     if (!parent) {
       throw new NotFoundError('Edificio no encontrado');
     }
-    const existing = await unitRepository.listByBuilding(buildingId);
-    if (existing.some((row) => row.number === number)) {
+    if (await unitRepository.existsByNumber(number, buildingId)) {
       throw new ConflictError('Ya existe una unidad con ese número en el edificio');
     }
     const row = await unitRepository.insert({

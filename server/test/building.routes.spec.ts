@@ -6,6 +6,7 @@ import connection from '../db/connection';
 import { migrateToLatest, wipe } from './helpers/db';
 import { appRequest, signToken } from './helpers/http';
 import { buildingRouter } from '../src/routes/building.routes';
+import { errorHandler } from '../src/middlewares/errorHandler';
 import { condominiumService } from '../src/services/condominium.service';
 import { unitService } from '../src/services/unit.service';
 
@@ -22,6 +23,7 @@ function buildApp(): express.Express {
   app.use(express.json());
   app.use(cookieParser());
   app.use('/api/v1/buildings', buildingRouter);
+  app.use(errorHandler);
   return app;
 }
 

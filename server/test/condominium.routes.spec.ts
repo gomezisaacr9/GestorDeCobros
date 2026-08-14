@@ -5,6 +5,7 @@ import connection from '../db/connection';
 import { migrateToLatest, wipe } from './helpers/db';
 import { appRequest, signToken } from './helpers/http';
 import { condominiumRouter } from '../src/routes/condominium.routes';
+import { errorHandler } from '../src/middlewares/errorHandler';
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
@@ -18,6 +19,7 @@ function buildApp(): express.Express {
   app.use(express.json());
   app.use(cookieParser());
   app.use('/api/v1/condominiums', condominiumRouter);
+  app.use(errorHandler);
   return app;
 }
 

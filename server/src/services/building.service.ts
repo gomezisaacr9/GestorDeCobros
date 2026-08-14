@@ -29,8 +29,7 @@ export const buildingService = {
     if (!parent) {
       throw new NotFoundError('Condominio no encontrado');
     }
-    const existing = await buildingRepository.listByCondominium(condominiumId);
-    if (existing.some((row) => row.name === name)) {
+    if (await buildingRepository.existsByName(name, condominiumId)) {
       throw new ConflictError('Ya existe un edificio con ese nombre en el condominio');
     }
     const row = await buildingRepository.insert({

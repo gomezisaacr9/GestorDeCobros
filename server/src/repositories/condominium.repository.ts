@@ -44,4 +44,10 @@ export const condominiumRepository = {
     const row = await connection('condominiums').select('id').where({ id }).first();
     return row !== undefined;
   },
+
+  /** True when an active row with this name exists. */
+  async existsByName(name: string): Promise<boolean> {
+    const row = await connection('condominiums').select('id').where({ name }).whereNull('deleted_at').first();
+    return row !== undefined;
+  },
 };

@@ -9,6 +9,7 @@ import { unitRouter } from '../src/routes/unit.routes';
 import { buildingRouter } from '../src/routes/building.routes';
 import { condominiumService } from '../src/services/condominium.service';
 import { buildingService } from '../src/services/building.service';
+import { errorHandler } from '../src/middlewares/errorHandler';
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
@@ -24,6 +25,7 @@ function buildApp(): express.Express {
   app.use(cookieParser());
   app.use('/api/v1/units', unitRouter);
   app.use('/api/v1/buildings', buildingRouter);
+  app.use(errorHandler);
   return app;
 }
 
