@@ -20,22 +20,10 @@ function toPublic(row: CondominiumRow | CondominiumPublic): PublicCondominium {
 export const condominiumController = {
   /** POST /api/v1/condominiums — 201 + Location on success; 404/409 from domain errors. */
   async create(req: Request, res: Response): Promise<void> {
-    try {
-      const { name } = req.body as { name: string };
-      const created = await condominiumService.create(name);
-      res.setHeader('Location', `/api/v1/condominiums/${created.id}`);
-      res.status(201).json(toPublic(created));
-    } catch (err) {
-      if (err instanceof NotFoundError) {
-        res.status(404).json({ error: err.message });
-        return;
-      }
-      if (err instanceof ConflictError) {
-        res.status(409).json({ error: err.message });
-        return;
-      }
-      throw err;
-    }
+    const { name } = req.body as { name: string };
+    const created = await condominiumService.create(name);
+    res.setHeader('Location', `/api/v1/condominiums/${created.id}`);
+    res.status(201).json(toPublic(created));
   },
 
   /** GET /api/v1/condominiums — 200 with the active list. */

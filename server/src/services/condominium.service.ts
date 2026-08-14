@@ -24,8 +24,7 @@ export const condominiumService = {
    * repository a dumb CRUD layer.
    */
   async create(name: string): Promise<CondominiumPublic> {
-    const existing = await condominiumRepository.listByAll();
-    if (existing.some((row) => row.name === name)) {
+    if (await condominiumRepository.existsByName(name)) {
       throw new ConflictError('Ya existe un condominio con ese nombre');
     }
     const row = await condominiumRepository.insert({ id: randomUUID(), name });
