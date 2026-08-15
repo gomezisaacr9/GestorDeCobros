@@ -1,15 +1,12 @@
 import type { Request, Response } from 'express';
-import { env } from '../config/env';
 import { userRepository } from '../repositories/user.repository';
 import {
   hashPassword,
-  signToken,
   verifyCredentials,
   verifyPassword,
 } from '../services/auth.service';
+import { sessionService } from '../services/session.service';
 
-const COOKIE_NAME = 'auth_token';
-const COOKIE_MAX_AGE_MS = 8 * 60 * 60 * 1000; // 8h, aligned with JWT expiry
 const UNAUTHORIZED_LOGIN = 'Credenciales inválidas';
 
 interface PublicUser {
@@ -24,16 +21,6 @@ function toPublic(user: PublicUser): PublicUser {
   return { id: user.id, email: user.email, role: user.role, name: user.name };
 }
 
-function setSessionCookie(res: Response, token: string): void {
-  res.cookie(COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: env.NODE_ENV !== 'development',
-    sameSite: 'strict',
-    path: '/',
-    maxAge: COOKIE_MAX_AGE_MS,
-  });
-}
-
 export const authController = {
   /** POST /api/v1/auth/login — verify credentials, issue session cookie. */
   async login(req: Request, res: Response): Promise<void> {
@@ -43,8 +30,9 @@ export const authController = {
       res.status(401).json({ error: UNAUTHORIZED_LOGIN });
       return;
     }
-    const token = signToken({ sub: user.id, role: user.role });
-    setSessionCookie(res, token);
+    // D4: cookie issuance delegated to the shared session service so the
+    // invitation accept flow mints byte-identical session cookies (spec R7).
+    sessionService.setSessionCookie(res, user.id, user.role);
     res.status(200).json(toPublic(user));
   },
 
