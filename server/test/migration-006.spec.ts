@@ -32,8 +32,10 @@ describe('migration 006 — units.number NOT NULL', () => {
   });
 
   it('down() restores the exact 003 shape (no number column)', async () => {
-    // migrate.down() undoes ONLY the last migration (006) — migrate.rollback()
-    // would undo the whole batch (knex records all pending migrations in batch 1).
+    // migrate.down() undoes ONLY the last migration — since 007 now sits on
+    // top, roll it back first, then 006. (migrate.rollback() would undo the
+    // whole batch: knex records all pending migrations in batch 1.)
+    await connection.migrate.down();
     await connection.migrate.down();
     const info = await connection('units').columnInfo();
     expect(info.number).toBeUndefined();
