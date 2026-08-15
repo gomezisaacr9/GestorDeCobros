@@ -1,4 +1,5 @@
 import knex from 'knex';
 import config from './knexfile';
 
-export default knex(config.development);
+const environment = process.env.NODE_ENV || 'development';
+export default knex(config[environment]);
