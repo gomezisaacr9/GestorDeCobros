@@ -3,6 +3,7 @@ import express from 'express';
 import authRouter from './routes/auth.routes';
 import buildingRouter from './routes/building.routes';
 import condominiumRouter from './routes/condominium.routes';
+import invitationRouter from './routes/invitation.routes';
 import unitRouter from './routes/unit.routes';
 import { errorHandler } from './middlewares/errorHandler';
 
@@ -18,6 +19,7 @@ export function createApp(): express.Express {
   app.use('/api/v1/condominiums', condominiumRouter);
   app.use('/api/v1/buildings', buildingRouter);
   app.use('/api/v1/units', unitRouter);
+  app.use('/api/v1/invitations', invitationRouter);
   app.use(errorHandler);
   return app;
 }
