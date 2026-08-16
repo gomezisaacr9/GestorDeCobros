@@ -1,10 +1,13 @@
-# Spec: tenant-data-model
+# Delta for tenant-data-model
 
-## Requirements
+Change `expenses-engine` adds migration 008 (`expenses` + `payments`) with FK-safe rollback and a matching test wipe order. Three existing requirements change because they enumerate tables or migration order.
+
+## MODIFIED Requirements
 
 ### Requirement: Table Schemas
 
 The system MUST create eight tables via Knex migrations: `condominiums`, `buildings`, `units`, `users`, `invitations`, `resident_units`, `expenses`, `payments`. All tables MUST include `created_at`/`updated_at` timestamps; hierarchy, `users`, `invitations`, `expenses`, and `payments` keep nullable `deleted_at`.
+(Previously: six tables — `expenses` and `payments` did not exist)
 
 | Table | Columns (beyond timestamps) |
 |-------|------------------------------|
@@ -36,104 +39,10 @@ The system MUST create eight tables via Knex migrations: `condominiums`, `buildi
 - THEN `number` is a NOT NULL string column
 - AND inserting a unit without `number` fails
 
-### Requirement: Foreign Key Enforcement
-
-The database MUST enforce foreign keys natively (no explicit PRAGMA); inserts referencing missing parents MUST fail with `SQLITE_CONSTRAINT_FOREIGNKEY`.
-
-#### Scenario: Orphan building rejected
-
-- GIVEN no condominium with `id = c999`
-- WHEN a building with `condominium_id = c999` is inserted
-- THEN the insert throws `SQLITE_CONSTRAINT_FOREIGNKEY`
-
-#### Scenario: Orphan unit rejected
-
-- GIVEN no building with `id = b999`
-- WHEN a unit with `building_id = b999` is inserted
-- THEN the insert throws `SQLITE_CONSTRAINT_FOREIGNKEY`
-
-### Requirement: Unique Credentials
-
-The system MUST enforce uniqueness of `users.email`; duplicate emails MUST fail with `SQLITE_CONSTRAINT_UNIQUE`.
-
-#### Scenario: Duplicate email rejected
-
-- GIVEN an existing user with `email = a@b.com`
-- WHEN a second user with the same email is inserted
-- THEN the insert throws `SQLITE_CONSTRAINT_UNIQUE`
-
-### Requirement: RBAC Jurisdiction CHECK
-
-The system MUST enforce role-jurisdiction consistency via a table-level CHECK on `users`, hierarchy `superadmin > condo_admin > building_admin > resident`:
-
-| Role | condominium_id | building_id | unit_id |
-|------|---------------|-------------|---------|
-| superadmin | NULL | NULL | NULL |
-| condo_admin | NOT NULL | NULL | NULL |
-| building_admin | NOT NULL | NOT NULL | NULL |
-| resident | any | any | any |
-
-The resident branch MUST NOT constrain jurisdiction FKs (membership now lives in `resident_units`); admin branches keep the 004 constraints. Migration 007 MUST rebuild `users` with this reduced CHECK (SQLite cannot ALTER a CHECK) and its `down()` MUST restore the original 004 CHECK.
-
-#### Scenario: Valid legacy resident passes
-
-- GIVEN `role = 'resident'` and all three FKs NOT NULL (legacy 004-shaped row)
-- WHEN the user is inserted
-- THEN the insert succeeds
-
-#### Scenario: Resident without unit allowed
-
-- GIVEN `role = 'resident'` and `unit_id` NULL
-- WHEN the user is inserted
-- THEN the insert succeeds
-
-#### Scenario: Superadmin with jurisdiction rejected
-
-- GIVEN `role = 'superadmin'` and `condominium_id` NOT NULL
-- WHEN the user is inserted
-- THEN the insert throws `SQLITE_CONSTRAINT_CHECK`
-
-#### Scenario: Condo admin without condominium rejected
-
-- GIVEN `role = 'condo_admin'` and `condominium_id` NULL
-- WHEN the user is inserted
-- THEN the insert throws `SQLITE_CONSTRAINT_CHECK`
-
-### Requirement: Invitations Table
-
-Migration 007 MUST create `invitations`: `id` UUID PK; `token_hash` TEXT NOT NULL UNIQUE (SHA-256 digest ONLY — raw tokens MUST NOT be stored); `unit_id` UUID NOT NULL FK → units; `created_by` UUID NOT NULL FK → users; `expires_at` TEXT NOT NULL (ISO); `status` TEXT NOT NULL CHECK (`status IN ('active','used')`); `created_at`/`updated_at`; nullable `deleted_at`. Expiry MUST be derived from `expires_at` — `expired` is never a stored status.
-
-#### Scenario: Duplicate token hash rejected
-
-- GIVEN an existing invitation with `token_hash = h1`
-- WHEN a second row with the same `token_hash` is inserted
-- THEN the insert throws `SQLITE_CONSTRAINT_UNIQUE`
-
-#### Scenario: Status CHECK enforced
-
-- GIVEN the `invitations` table
-- WHEN a row with `status = 'expired'` is inserted
-- THEN the insert throws `SQLITE_CONSTRAINT_CHECK`
-
-### Requirement: Resident Unit Membership
-
-Migration 007 MUST create `resident_units`: `user_id` UUID NOT NULL FK → users, `unit_id` UUID NOT NULL FK → units, `created_at` NOT NULL, composite PRIMARY KEY (`user_id`, `unit_id`). No `id` column and no `deleted_at`. The table MUST enable M:N membership (one resident, many units; one unit, many residents).
-
-#### Scenario: Duplicate membership rejected
-
-- GIVEN a `(user_id, unit_id)` pair already present
-- WHEN the same pair is inserted again
-- THEN the insert throws `SQLITE_CONSTRAINT_PRIMARYKEY`
-
-#### Scenario: Multi-property resident
-
-- GIVEN one resident user and two units
-- WHEN a `resident_units` row is inserted for each unit
-- THEN both inserts succeed and the user belongs to both units
-
 ### Requirement: Soft Delete Semantics
 
 All hierarchy tables, `users`, `invitations`, `expenses`, and `payments` MUST include nullable `deleted_at`. Rows with `deleted_at IS NULL` are active; rows with `deleted_at` set are logically deleted but MUST remain physically present. `resident_units` does NOT have `deleted_at`.
+(Previously: the soft-delete list did not include `expenses`/`payments`)
 
 #### Scenario: Logical delete marks the row
 
@@ -141,29 +50,10 @@ All hierarchy tables, `users`, `invitations`, `expenses`, and `payments` MUST in
 - WHEN `deleted_at` is set to the current timestamp
 - THEN the row persists with `deleted_at IS NOT NULL`
 
-### Requirement: Foreign Key and Role Indexes
-
-The system MUST index `buildings.condominium_id`, `units.building_id`, `users.condominium_id`, `users.building_id`, `users.unit_id`, and `users.role`.
-
-#### Scenario: Indexes exist after migration
-
-- GIVEN migrations applied
-- WHEN querying `sqlite_master` for index names
-- THEN `idx_buildings_condominium_id` and `idx_users_role` exist
-
-### Requirement: Superadmin Seed
-
-The system MUST seed exactly one root superadmin in migrations, with `role = 'superadmin'`, all three jurisdiction FKs NULL, and non-nullable `email` + `password_hash` (provisional).
-
-#### Scenario: Root superadmin exists after migrate
-
-- GIVEN `knex migrate:latest` completed
-- WHEN querying `users` where `role = 'superadmin'`
-- THEN exactly one row exists with all jurisdiction FKs NULL
-
 ### Requirement: Migration Order and Rollback
 
 Migrations MUST run in FK order `001_condominiums` → `002_buildings` → `003_units` → `004_users` → `005_users_add_name` → `006_units_add_number` → `007_invitations_resident_units` → `008_expenses_payments`. Every migration MUST implement `down()`; `007 down()` MUST drop `resident_units`, drop `invitations`, and rebuild `users` with the original 004 CHECK (INSERT…SELECT preserve); `008 down()` MUST drop `payments` then `expenses` (FK order). Full rollback MUST empty the database.
+(Previously: the chain ended at 007)
 
 #### Scenario: Clean rollback
 
@@ -177,6 +67,9 @@ Migrations MUST run in FK order `001_condominiums` → `002_buildings` → `003_
 - GIVEN all migrations applied through 008
 - WHEN `knex migrate:rollback` rolls back exactly one step
 - THEN `payments` and `expenses` are gone, `invitations`/`resident_units` survive, and the `users` CHECK is still the relaxed 007 form (restoring the 004 CHECK now takes two steps)
+(Previously: one step restored the 004 CHECK — 008 sits on top, so step one only drops the new tables)
+
+## ADDED Requirements
 
 ### Requirement: Migration 008 — Expenses Table
 
@@ -231,6 +124,7 @@ Migration 008 MUST create `payments`: `id` UUID PK; `expense_id` UUID NOT NULL F
 ### Requirement: Test Wipe Order
 
 `server/test/helpers/db.ts` `wipe()` MUST delete tables in FK-child-first order: `payments` → `expenses` → `invitations` → `resident_units` → `users` → `units` → `buildings` → `condominiums`. `payments` MUST precede `expenses` (references it) and `expenses` MUST precede `units`; `users` MUST precede the hierarchy tables it references.
+(Previously: `invitations → resident_units → users → units → buildings → condominiums`)
 
 #### Scenario: Full wipe never fires FK constraints
 
