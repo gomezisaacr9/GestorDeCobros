@@ -2,8 +2,9 @@ import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import type { Knex } from 'knex';
 import connection from '../../../db/connection';
 import { ConflictError, GoneError, NotFoundError } from '../../errors/http-errors';
-import { invitationRepository, type AdminRow } from './invitation.repository';
+import { invitationRepository } from './invitation.repository';
 import { residentUnitService } from '../hierarchy/resident-unit.service';
+import { jurisdictionService, type AdminRow } from '../hierarchy/jurisdiction.service';
 import { getUserById, findResidentByEmail, createResident, hashPassword, type UserRow } from '../auth/auth.service';
 
 /**
@@ -82,7 +83,7 @@ export const invitationService = {
     if (!admin) {
       throw new NotFoundError('Unidad no encontrada');
     }
-    const chain = await invitationRepository.findUnitInJurisdiction(input.unit_id, admin as AdminRow);
+    const chain = await jurisdictionService.checkJurisdiction(input.unit_id, admin as AdminRow);
     if (!chain) {
       throw new NotFoundError('Unidad no encontrada'); // unknown / cross-jurisdiction / soft-deleted
     }
@@ -113,7 +114,7 @@ export const invitationService = {
     if (isExpired(invitation.expires_at) || invitation.status !== 'active') {
       throw new GoneError('Invitación expirada o ya utilizada');
     }
-    const chain = await invitationRepository.findUnitChain(invitation.unit_id);
+    const chain = await jurisdictionService.getUnitChain(invitation.unit_id);
     if (!chain) {
       throw new GoneError('Invitación expirada o ya utilizada');
     }
@@ -145,7 +146,7 @@ export const invitationService = {
       if (invitation.status !== 'active') {
         throw new ConflictError('Invitación ya utilizada'); // S12
       }
-      const chain = await invitationRepository.findUnitChain(invitation.unit_id, trx);
+      const chain = await jurisdictionService.getUnitChain(invitation.unit_id, trx);
       if (!chain) {
         throw new GoneError('Invitación expirada o ya utilizada'); // dead unit chain (D8)
       }

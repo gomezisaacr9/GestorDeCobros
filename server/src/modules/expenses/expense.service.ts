@@ -5,7 +5,7 @@ import { ConflictError, NotFoundError } from '../../errors/http-errors';
 import { expenseRepository } from './expense.repository';
 import { paymentRepository, type PaymentRow } from '../payments/payment.repository';
 import { residentUnitService } from '../hierarchy/resident-unit.service';
-import { findUnitInJurisdiction, type AdminRow } from '../hierarchy/unit-jurisdiction';
+import { jurisdictionService, type AdminRow } from '../hierarchy/jurisdiction.service';
 import { getUserById } from '../auth/auth.service';
 import {
   toPublicExpense,
@@ -45,7 +45,7 @@ export const expenseService = {
       // per-family byte-identical body is «Unidad no encontrada».
       throw new NotFoundError('Unidad no encontrada');
     }
-    const chain = await findUnitInJurisdiction(input.unit_id, admin as AdminRow);
+    const chain = await jurisdictionService.checkJurisdiction(input.unit_id, admin as AdminRow);
     if (!chain) {
       throw new NotFoundError('Unidad no encontrada'); // unknown / cross-jurisdiction / soft-deleted (S6/S7)
     }

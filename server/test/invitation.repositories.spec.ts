@@ -8,6 +8,7 @@ import { unitService } from '../src/modules/hierarchy/unit.service';
 import { invitationRepository } from '../src/modules/invitations/invitation.repository';
 import { residentUnitsRepository } from '../src/modules/hierarchy/resident-units.repository';
 import { userRepository } from '../src/modules/auth/user.repository';
+import { jurisdictionService } from '../src/modules/hierarchy/jurisdiction.service';
 
 /**
  * Domain-core repository layer for invitation-onboarding (PR 2 / slice 2):
@@ -176,14 +177,14 @@ describe('invitation repositories — domain core', () => {
     });
   });
 
-  describe('invitationRepository.findUnitInJurisdiction (D3 per-role predicates)', () => {
+  describe('jurisdictionService.checkJurisdiction (D3 per-role predicates)', () => {
     it('superadmin resolves any active unit — two chains from different condominiums', async () => {
       const mine = await seedChain('Torre Norte', 'Edificio A');
       const other = await seedChain('Parque Central', 'Edificio B');
       const admin = await seedAdmin('superadmin');
 
-      const inScope = await invitationRepository.findUnitInJurisdiction(mine.unitId, admin);
-      const otherScope = await invitationRepository.findUnitInJurisdiction(other.unitId, admin);
+      const inScope = await jurisdictionService.checkJurisdiction(mine.unitId, admin as any);
+      const otherScope = await jurisdictionService.checkJurisdiction(other.unitId, admin as any);
       expect(inScope?.unit_number).toBe('101');
       expect(otherScope?.unit_number).toBe('101');
       expect(inScope?.condominium_name).toBe('Torre Norte');
@@ -195,8 +196,8 @@ describe('invitation repositories — domain core', () => {
       const other = await seedChain('Parque Central', 'Edificio B');
       const admin = await seedAdmin('condo_admin', { condominiumId: mine.condoId });
 
-      const inScope = await invitationRepository.findUnitInJurisdiction(mine.unitId, admin);
-      const cross = await invitationRepository.findUnitInJurisdiction(other.unitId, admin);
+      const inScope = await jurisdictionService.checkJurisdiction(mine.unitId, admin as any);
+      const cross = await jurisdictionService.checkJurisdiction(other.unitId, admin as any);
       expect(inScope?.unit_number).toBe('101');
       expect(cross).toBeUndefined(); // cross-jurisdiction unit is invisible
     });
@@ -209,8 +210,8 @@ describe('invitation repositories — domain core', () => {
         buildingId: mine.buildingId,
       });
 
-      const inScope = await invitationRepository.findUnitInJurisdiction(mine.unitId, admin);
-      const otherBuilding = await invitationRepository.findUnitInJurisdiction(other.unitId, admin);
+      const inScope = await jurisdictionService.checkJurisdiction(mine.unitId, admin as any);
+      const otherBuilding = await jurisdictionService.checkJurisdiction(other.unitId, admin as any);
       expect(inScope?.building_name).toBe('Edificio A');
       expect(otherBuilding).toBeUndefined();
     });
@@ -220,21 +221,21 @@ describe('invitation repositories — domain core', () => {
       const admin = await seedAdmin('superadmin');
 
       await connection('units').where({ id: unitId }).update({ deleted_at: connection.fn.now() });
-      expect(await invitationRepository.findUnitInJurisdiction(unitId, admin)).toBeUndefined();
+      expect(await jurisdictionService.checkJurisdiction(unitId, admin as any)).toBeUndefined();
 
       const chain2 = await seedChain('Segunda', 'Edificio C');
       await connection('buildings').where({ id: chain2.buildingId }).update({ deleted_at: connection.fn.now() });
-      expect(await invitationRepository.findUnitInJurisdiction(chain2.unitId, admin)).toBeUndefined();
+      expect(await jurisdictionService.checkJurisdiction(chain2.unitId, admin as any)).toBeUndefined();
 
       const chain3 = await seedChain('Tercera', 'Edificio D');
       await connection('condominiums').where({ id: chain3.condoId }).update({ deleted_at: connection.fn.now() });
-      expect(await invitationRepository.findUnitInJurisdiction(chain3.unitId, admin)).toBeUndefined();
+      expect(await jurisdictionService.checkJurisdiction(chain3.unitId, admin as any)).toBeUndefined();
       void buildingId;
       void condoId;
     });
   });
 
-  describe('invitationRepository.findActiveByTokenHash + findUnitChain', () => {
+  describe('invitationRepository.findActiveByTokenHash + getUnitChain', () => {
     it('returns the active row for a known hash and undefined for an unknown one', async () => {
       const { unitId } = await seedChain();
       const admin = await seedAdmin('superadmin');
@@ -258,10 +259,10 @@ describe('invitation repositories — domain core', () => {
       expect(await invitationRepository.findActiveByTokenHash(inv.token_hash)).toBeUndefined();
     });
 
-    it('findUnitChain returns read-only names of the active chain', async () => {
+    it('getUnitChain returns read-only names of the active chain', async () => {
       const { unitId, condoId, buildingId } = await seedChain('Torre Norte', 'Edificio A');
 
-      const chain = await invitationRepository.findUnitChain(unitId);
+      const chain = await jurisdictionService.getUnitChain(unitId);
       expect(chain).toEqual({
         unit_id: unitId,
         unit_number: '101',
@@ -272,11 +273,11 @@ describe('invitation repositories — domain core', () => {
       });
     });
 
-    it('findUnitChain returns undefined for a missing or soft-deleted unit', async () => {
+    it('getUnitChain returns undefined for a missing or soft-deleted unit', async () => {
       const ghost = await seedChain('Fantasma', 'Edificio F');
-      expect(await invitationRepository.findUnitChain(randomUUID())).toBeUndefined();
+      expect(await jurisdictionService.getUnitChain(randomUUID())).toBeUndefined();
       await connection('units').where({ id: ghost.unitId }).update({ deleted_at: connection.fn.now() });
-      expect(await invitationRepository.findUnitChain(ghost.unitId)).toBeUndefined();
+      expect(await jurisdictionService.getUnitChain(ghost.unitId)).toBeUndefined();
     });
   });
 
