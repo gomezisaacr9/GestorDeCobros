@@ -134,3 +134,25 @@ export function toPublicPayment(row: PaymentRowLike): PaymentPublic {
     created_at: row.created_at,
   };
 }
+
+export interface ReviewPublic {
+  id: string;
+  decision: string;
+  expense_id: string;
+  expense_status: string;
+  updated_at: string;
+}
+
+/**
+ * Review response (R4): EXACTLY `{ id, decision, expense_id, expense_status,
+ * updated_at }` — nothing else (status is the decision applied to both rows).
+ */
+export function toPublicReview(
+  id: string,
+  decision: string,
+  expenseId: string,
+  expenseStatus: string,
+  updatedAt: string,
+): ReviewPublic {
+  return { id, decision, expense_id: expenseId, expense_status: expenseStatus, updated_at: updatedAt };
+}

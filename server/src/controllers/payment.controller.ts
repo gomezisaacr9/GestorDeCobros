@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import type { AuthUser } from '../middlewares/requireAuth';
-import type { ExpenseReportInput } from '../schemas/expense.schemas';
+import type { ExpenseReportInput, ExpenseReviewInput } from '../schemas/expense.schemas';
 import { expenseService } from '../services/expense.service';
 
 /**
@@ -10,6 +10,8 @@ import { expenseService } from '../services/expense.service';
  *
  * - report: guarded (requireAuth → requireRole resident → validateZod) — 201
  *   with the R3 public shape
+ * - review: guarded (requireAuth → requireRole superadmin/condo_admin →
+ *   validateZod) — 200 with the R4 public shape
  */
 export const paymentController = {
   /** POST /api/v1/expenses/:id/payments — resident proof report (R3). */
@@ -19,5 +21,14 @@ export const paymentController = {
     const { proof_url } = req.body as ExpenseReportInput;
     const payment = await expenseService.reportPayment(actor.id, id, proof_url);
     res.status(201).json(payment);
+  },
+
+  /** POST /api/v1/payments/:paymentId/review — admin decision (R4). */
+  async review(req: Request, res: Response): Promise<void> {
+    const actor = req.user as AuthUser;
+    const paymentId = String(req.params.paymentId);
+    const { decision } = req.body as ExpenseReviewInput;
+    const result = await expenseService.review(paymentId, actor, decision);
+    res.status(200).json(result);
   },
 };

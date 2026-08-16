@@ -11,10 +11,12 @@ import {
   toPublicExpense,
   toPublicPanelItem,
   toPublicPayment,
+  toPublicReview,
   type ExpenseCreateInput,
   type ExpensePublic,
   type PaymentPublic,
   type PanelItemPublic,
+  type ReviewPublic,
 } from '../schemas/expense.schemas';
 
 /**
@@ -158,5 +160,66 @@ export const expenseService = {
       throw new NotFoundError('Gasto no encontrado');
     }
     return toPublicPayment(created);
+  },
+
+  /**
+   * Guarded review (R4/S22–S29, design D4 — 3-step single tx). Step 0:
+   * `findWithCondominium` is the source of the 404 AND the jurisdiction
+   * anchor — condo_admin may only review payments in their OWN condominium,
+   * otherwise byte-identical 404 «Pago no encontrado» (S24, never 403);
+   * superadmin → any. Then ONE transaction, EXACTLY this order (D4):
+   *   (a) guarded payment flip `under_review → decision` (0 rows ⇒ 409 —
+   *       S25 re-review, S27 race loser);
+   *   (b) latest-payment check — the reviewed payment MUST be the latest
+   *       (`created_at DESC, id DESC`); a newer payment ⇒ 409 (S26);
+   *   (c) guarded expense flip `under_review → decision` (0 rows ⇒ 409).
+   * ANY failure rolls back and leaves both rows unchanged (R4/R5, S31).
+   * The knex pool `min:1 max:1` serializes one better-sqlite3 connection so
+   * exactly one of two concurrent reviews flips first (S27).
+   */
+  async review(paymentId: string, actor: CreateActor, decision: string): Promise<ReviewPublic> {
+    const payment = await paymentRepository.findWithCondominium(paymentId);
+    if (!payment) {
+      throw new NotFoundError('Pago no encontrado'); // S29 (nonexistent or soft-deleted payment)
+    }
+
+    if (actor.role !== 'superadmin') {
+      // S24: condo_admin outside their condominium ⇒ the SAME 404 body as a
+      // nonexistent payment (fail-closed, never 403 — spec R4).
+      const admin = await userRepository.findById(actor.id);
+      if (!admin || admin.condominium_id !== payment.condominium_id) {
+        throw new NotFoundError('Pago no encontrado');
+      }
+    }
+
+    const expenseId = payment.expense_id;
+    let updatedAt = '';
+    await connection.transaction(async (trx: Knex) => {
+      // (a) guarded payment flip — exactly one `under_review → decision`.
+      const payFlipped = await paymentRepository.updateStatusGuarded(paymentId, decision, trx);
+      if (payFlipped === 0) {
+        throw new ConflictError('El pago ya fue decidido o no admite revisión'); // S25 / S27 loser
+      }
+      // (b) latest-payment check: the target MUST still be the expense's
+      // latest payment (a newer report would be out of order, S26).
+      const latest = await paymentRepository.latestByExpenseId(expenseId, trx);
+      if (!latest || latest.id !== paymentId) {
+        throw new ConflictError('Solo puede revisarse el último pago del gasto'); // S26
+      }
+      // (c) guarded expense flip — mirrors the payment decision (R5).
+      const expFlipped = await expenseRepository.updateStatusGuarded(
+        expenseId,
+        ['under_review'],
+        decision,
+        trx,
+      );
+      if (expFlipped === 0) {
+        throw new ConflictError('El gasto no admite revisión en su estado actual'); // S31 edge
+      }
+      const updated = await paymentRepository.findWithCondominium(paymentId, trx);
+      updatedAt = updated?.updated_at ?? '';
+    });
+
+    return toPublicReview(paymentId, decision, expenseId, decision, updatedAt);
   },
 };
