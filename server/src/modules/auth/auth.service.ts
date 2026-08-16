@@ -1,8 +1,51 @@
-import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
+import { randomBytes, randomUUID, scryptSync, timingSafeEqual } from 'node:crypto';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import type { Knex } from 'knex';
 import { env } from '../../config/env';
+import { ConflictError } from '../../errors/http-errors';
 import { userRepository, type UserRow } from './user.repository';
+
+export type { UserRow };
+
+/**
+ * Public Facade Methods (Cross-Module Orchestration)
+ */
+
+export async function getUserById(id: string, trx?: Knex.Transaction): Promise<UserRow | undefined> {
+  return userRepository.findById(id, trx);
+}
+
+export async function findResidentByEmail(email: string, trx?: Knex.Transaction): Promise<UserRow | undefined> {
+  return userRepository.findAnyByEmail(email, trx);
+}
+
+export async function createResident(
+  input: { email: string; password_hash: string; name?: string | null },
+  trx?: Knex.Transaction
+): Promise<UserRow> {
+  const row: UserRow = {
+    id: randomUUID(),
+    email: input.email,
+    role: 'resident',
+    name: input.name?.trim() || null,
+    password_hash: input.password_hash,
+    condominium_id: null,
+    building_id: null,
+    unit_id: null,
+    deleted_at: null,
+  };
+
+  try {
+    await userRepository.insert(row, trx);
+  } catch (err) {
+    if ((err as { code?: string }).code === 'SQLITE_CONSTRAINT_UNIQUE') {
+      throw new ConflictError('No se puede vincular el email');
+    }
+    throw err;
+  }
+  return row;
+}
 
 const BCRYPT_COST = 12; // OWASP baseline; ~100–300ms per hash
 const TOKEN_TTL = '8h';

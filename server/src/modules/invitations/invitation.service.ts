@@ -2,10 +2,10 @@ import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import type { Knex } from 'knex';
 import connection from '../../../db/connection';
 import { ConflictError, GoneError, NotFoundError } from '../../errors/http-errors';
-import { invitationRepository, type AdminRow } from './invitation.repository';
-import { residentUnitsRepository } from '../hierarchy/resident-units.repository';
-import { userRepository, type UserRow } from '../auth/user.repository';
-import { hashPassword } from '../auth/auth.service';
+import { invitationRepository } from './invitation.repository';
+import { residentUnitService } from '../hierarchy/resident-unit.service';
+import { jurisdictionService, type AdminRow } from '../hierarchy/jurisdiction.service';
+import { getUserById, findResidentByEmail, createResident, hashPassword, type UserRow } from '../auth/auth.service';
 
 /**
  * Single-use magic-link invitations (design D1..D8; specs invitation-admin R1–R4,
@@ -79,11 +79,11 @@ export const invitationService = {
     actor: { id: string; role: string },
     input: { unit_id: string; expires_in_hours?: number },
   ): Promise<{ magic_link: string }> {
-    const admin = await userRepository.findById(actor.id);
+    const admin = await getUserById(actor.id);
     if (!admin) {
       throw new NotFoundError('Unidad no encontrada');
     }
-    const chain = await invitationRepository.findUnitInJurisdiction(input.unit_id, admin as AdminRow);
+    const chain = await jurisdictionService.checkJurisdiction(input.unit_id, admin as AdminRow);
     if (!chain) {
       throw new NotFoundError('Unidad no encontrada'); // unknown / cross-jurisdiction / soft-deleted
     }
@@ -114,7 +114,7 @@ export const invitationService = {
     if (isExpired(invitation.expires_at) || invitation.status !== 'active') {
       throw new GoneError('Invitación expirada o ya utilizada');
     }
-    const chain = await invitationRepository.findUnitChain(invitation.unit_id);
+    const chain = await jurisdictionService.getUnitChain(invitation.unit_id);
     if (!chain) {
       throw new GoneError('Invitación expirada o ya utilizada');
     }
@@ -146,11 +146,11 @@ export const invitationService = {
       if (invitation.status !== 'active') {
         throw new ConflictError('Invitación ya utilizada'); // S12
       }
-      const chain = await invitationRepository.findUnitChain(invitation.unit_id, trx);
+      const chain = await jurisdictionService.getUnitChain(invitation.unit_id, trx);
       if (!chain) {
         throw new GoneError('Invitación expirada o ya utilizada'); // dead unit chain (D8)
       }
-      const holder = await userRepository.findAnyByEmail(input.email, trx);
+      const holder = await findResidentByEmail(input.email, trx);
 
       let user: UserRow;
       let created = false;
@@ -160,30 +160,12 @@ export const invitationService = {
         }
         user = holder;
       } else {
-        const row: UserRow = {
-          id: randomUUID(),
-          email: input.email,
-          role: 'resident',
-          name: input.name?.trim() || null,
-          password_hash: await hashPassword(input.password),
-          condominium_id: null,
-          building_id: null,
-          unit_id: null,
-          deleted_at: null,
-        };
-        try {
-          await userRepository.insert(row, trx);
-        } catch (err) {
-          if ((err as { code?: string }).code === 'SQLITE_CONSTRAINT_UNIQUE') {
-            throw new ConflictError('No se puede vincular el email'); // R5 race branch
-          }
-          throw err; // any other DB failure → rollback + 5xx (S15)
-        }
-        user = row;
+        const password_hash = await hashPassword(input.password);
+        user = await createResident({ email: input.email, password_hash, name: input.name }, trx);
         created = true;
       }
 
-      await residentUnitsRepository.linkIfAbsent(user.id, invitation.unit_id, trx);
+      await residentUnitService.linkResidentToUnit(user.id, invitation.unit_id, trx);
       const affected = await invitationRepository.markUsed(invitation.id, trx);
       if (affected === SLEEPER_DEAD) {
         throw new ConflictError('Invitación ya utilizada'); // concurrent consume (D2)

@@ -4,9 +4,9 @@ import connection from '../../../db/connection';
 import { ConflictError, NotFoundError } from '../../errors/http-errors';
 import { expenseRepository } from './expense.repository';
 import { paymentRepository, type PaymentRow } from '../payments/payment.repository';
-import { residentUnitsRepository } from '../hierarchy/resident-units.repository';
-import { findUnitInJurisdiction, type AdminRow } from '../hierarchy/unit-jurisdiction';
-import { userRepository } from '../auth/user.repository';
+import { residentUnitService } from '../hierarchy/resident-unit.service';
+import { jurisdictionService, type AdminRow } from '../hierarchy/jurisdiction.service';
+import { getUserById } from '../auth/auth.service';
 import {
   toPublicExpense,
   toPublicPanelItem,
@@ -39,13 +39,13 @@ export interface CreateActor {
 export const expenseService = {
   /** Emission (R1): admin row → shared jurisdiction → pre-check → guarded insert. */
   async create(actor: CreateActor, input: ExpenseCreateInput): Promise<ExpensePublic> {
-    const admin = await userRepository.findById(actor.id);
+    const admin = await getUserById(actor.id);
     if (!admin) {
       // invitation.create pattern (D3): the actor lookup owns the 404; the
       // per-family byte-identical body is «Unidad no encontrada».
       throw new NotFoundError('Unidad no encontrada');
     }
-    const chain = await findUnitInJurisdiction(input.unit_id, admin as AdminRow);
+    const chain = await jurisdictionService.checkJurisdiction(input.unit_id, admin as AdminRow);
     if (!chain) {
       throw new NotFoundError('Unidad no encontrada'); // unknown / cross-jurisdiction / soft-deleted (S6/S7)
     }
@@ -81,7 +81,7 @@ export const expenseService = {
    * no proof_url, no deleted_at (toPublic guards).
    */
   async listMine(userId: string): Promise<PanelItemPublic[]> {
-    const unitIds = await residentUnitsRepository.listUnitIdsByUser(userId);
+    const unitIds = await residentUnitService.getUserUnitIds(userId);
     if (unitIds.length === 0) {
       return []; // S11 — zero units, no expenses query
     }
@@ -104,4 +104,15 @@ export const expenseService = {
       toPublicPanelItem(row, latestStatusByExpense.get(row.id) ?? null),
     );
   },
+
+  /**
+   * Public Facade Methods (Cross-Module Orchestration for Payments)
+   */
+  async getExpenseById(id: string, trx?: Knex.Transaction) {
+    return expenseRepository.findActiveById(id, trx);
+  },
+
+  async updateExpenseStatus(id: string, fromStatuses: string[], toStatus: string, trx?: Knex.Transaction): Promise<number> {
+    return expenseRepository.updateStatusGuarded(id, fromStatuses, toStatus, trx);
+  }
 };
