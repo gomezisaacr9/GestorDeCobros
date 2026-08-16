@@ -13,6 +13,12 @@ import { hashPassword } from '../src/services/auth.service';
  * session.service refactor: they pass against the controller's local
  * `setSessionCookie` and must STILL pass after delegation — any change in
  * this contract is a refactor bug (safety net for D4).
+ *
+ * Real bcrypt ($2b$12$) work happens in `seedUser` and in each `login`
+ * request: under the full forked suite (24 files) those hash/verify calls
+ * can exceed vitest's default 5s test timeout on a loaded machine, so this
+ * describe raises it to 20s. Semantics are untouched — the assertions and
+ * the frozen contract are exactly the same.
  */
 
 const COOKIE_NAME = 'auth_token';
@@ -42,7 +48,7 @@ function authCookieOf(res: Response): string {
   return cookie.split(';')[0].split('=')[1] ?? '';
 }
 
-describe('authController — approval / behavior freeze (pre-refactor)', () => {
+describe('authController — approval / behavior freeze (pre-refactor)', { timeout: 20_000 }, () => {
   beforeAll(async () => {
     await migrateToLatest(connection);
   });
