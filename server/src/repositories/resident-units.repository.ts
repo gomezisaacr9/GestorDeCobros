@@ -32,4 +32,14 @@ export const residentUnitsRepository = {
       .first();
     return row !== undefined;
   },
+
+  /**
+   * All unit ids the user is linked to (spec R2 panel membership filter —
+   * task 1.4, PR-1 BLOCKER for the resident panel). Single SQL filter, no
+   * joins: one id per `resident_units` row, empty array when there are none.
+   */
+  async listUnitIdsByUser(userId: string, trx: Knex = connection): Promise<string[]> {
+    const rows = await trx('resident_units').select('unit_id').where({ user_id: userId });
+    return rows.map((row) => row.unit_id);
+  },
 };
