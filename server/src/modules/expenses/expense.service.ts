@@ -3,7 +3,7 @@ import type { Knex } from 'knex';
 import connection from '../../../db/connection';
 import { ConflictError, NotFoundError } from '../../errors/http-errors';
 import { expenseRepository } from './expense.repository';
-import { paymentRepository, type PaymentRow } from '../payments/payment.repository';
+import { paymentService } from '../payments/payment.service';
 import { residentUnitService } from '../hierarchy/resident-unit.service';
 import { jurisdictionService, type AdminRow } from '../hierarchy/jurisdiction.service';
 import { getUserById } from '../auth/auth.service';
@@ -90,7 +90,7 @@ export const expenseService = {
       return [];
     }
 
-    const payments = await paymentRepository.latestByExpenseIds(rows.map((r) => r.id));
+    const payments = await paymentService.getLatestByExpenseIds(rows.map((r) => r.id));
     // D5 merge: repo returns newest-first; first occurrence per expense is
     // its latest payment — `null` when there is none.
     const latestStatusByExpense = new Map<string, string>();

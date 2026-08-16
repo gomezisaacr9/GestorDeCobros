@@ -8,5 +8,9 @@ export const residentUnitService = {
 
   async getUserUnitIds(userId: string, trx?: Knex.Transaction): Promise<string[]> {
     return residentUnitsRepository.listUnitIdsByUser(userId, trx);
+  },
+
+  async existsLink(userId: string, unitId: string, trx?: Knex.Transaction): Promise<boolean> {
+    return residentUnitsRepository.existsLink(userId, unitId, trx);
   }
 };
