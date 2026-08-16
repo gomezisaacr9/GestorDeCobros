@@ -102,3 +102,35 @@ export function toPublicPanelItem(row: PanelRowLike, paymentStatus: string | nul
     payment_status: paymentStatus,
   };
 }
+
+/** Payment row shape accepted by `toPublicPayment` (superset of PaymentRow). */
+export interface PaymentRowLike {
+  id: string;
+  expense_id: string;
+  proof_url: string;
+  status: string;
+  created_at: string;
+}
+
+export interface PaymentPublic {
+  id: string;
+  expense_id: string;
+  proof_url: string;
+  status: string;
+  created_at: string;
+}
+
+/**
+ * Report response (R3): EXACTLY `{ id, expense_id, proof_url, status,
+ * created_at }` — `resident_id`, `updated_at`, and `deleted_at` never leave.
+ * Test S14 pins the full key set.
+ */
+export function toPublicPayment(row: PaymentRowLike): PaymentPublic {
+  return {
+    id: row.id,
+    expense_id: row.expense_id,
+    proof_url: row.proof_url,
+    status: row.status,
+    created_at: row.created_at,
+  };
+}

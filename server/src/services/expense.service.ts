@@ -1,15 +1,19 @@
 import { randomUUID } from 'node:crypto';
+import type { Knex } from 'knex';
+import connection from '../../db/connection';
 import { ConflictError, NotFoundError } from '../errors/http-errors';
 import { expenseRepository } from '../repositories/expense.repository';
-import { paymentRepository } from '../repositories/payment.repository';
+import { paymentRepository, type PaymentRow } from '../repositories/payment.repository';
 import { residentUnitsRepository } from '../repositories/resident-units.repository';
 import { findUnitInJurisdiction, type AdminRow } from '../repositories/unit-jurisdiction';
 import { userRepository } from '../repositories/user.repository';
 import {
   toPublicExpense,
   toPublicPanelItem,
+  toPublicPayment,
   type ExpenseCreateInput,
   type ExpensePublic,
+  type PaymentPublic,
   type PanelItemPublic,
 } from '../schemas/expense.schemas';
 
@@ -101,5 +105,58 @@ export const expenseService = {
     return rows.map((row) =>
       toPublicPanelItem(row, latestStatusByExpense.get(row.id) ?? null),
     );
+  },
+
+  /**
+   * Resident payment report (R3/S14–S21, design Report flow). Membership:
+   * active expense + `existsLink` — unknown / not-owned / soft-deleted ⇒
+   * byte-identical 404 «Gasto no encontrado» (S18/S19). ONE transaction:
+   * guarded expense flip `pending|rejected → under_review` (0 rows ⇒ 409 —
+   * covers under_review/approved, S16/S17, and the S21 race loser) then the
+   * payment insert (`status 'under_review'`); ANY failure rolls back.
+   */
+  async reportPayment(
+    residentId: string,
+    expenseId: string,
+    proofUrl: string,
+  ): Promise<PaymentPublic> {
+    const expense = await expenseRepository.findActiveById(expenseId);
+    if (!expense) {
+      throw new NotFoundError('Gasto no encontrado'); // S19 (never existed or soft-deleted)
+    }
+    const owns = await residentUnitsRepository.existsLink(residentId, expense.unit_id);
+    if (!owns) {
+      throw new NotFoundError('Gasto no encontrado'); // S18 neighbor — byte-identical to S19
+    }
+
+    const id = randomUUID();
+    let created: PaymentRow | undefined;
+    await connection.transaction(async (trx: Knex) => {
+      const affected = await expenseRepository.updateStatusGuarded(
+        expenseId,
+        ['pending', 'rejected'],
+        'under_review',
+        trx,
+      );
+      if (affected === 0) {
+        // S16 (under_review) / S17 (approved) / S21 loser — the machine
+        // rejected the transition; NOTHING was written, rollback is a no-op.
+        throw new ConflictError('El gasto no admite un nuevo reporte en su estado actual');
+      }
+      await paymentRepository.insert(
+        { id, expense_id: expenseId, resident_id: residentId, proof_url: proofUrl },
+        trx,
+      );
+      // Read back the EXACT inserted row (by id) inside the tx so the 201
+      // carries its real created_at — no "latest" ambiguity under timestamp
+      // ties (design D5 tie-break only governs derived lookups).
+      created = await paymentRepository.findWithCondominium(id, trx);
+    });
+
+    if (!created) {
+      // Unreachable after a successful tx, kept for type narrowing.
+      throw new NotFoundError('Gasto no encontrado');
+    }
+    return toPublicPayment(created);
   },
 };
