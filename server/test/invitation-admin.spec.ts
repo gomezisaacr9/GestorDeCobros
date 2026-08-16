@@ -6,13 +6,13 @@ import express from 'express';
 import connection from '../db/connection';
 import { migrateToLatest, wipe } from './helpers/db';
 import { appRequest, signToken } from './helpers/http';
-import { invitationRouter } from '../src/routes/invitation.routes';
+import { invitationRouter } from '../src/modules/invitations/invitation.routes';
 import { errorHandler } from '../src/middlewares/errorHandler';
 import { createApp } from '../src/app';
-import { condominiumService } from '../src/services/condominium.service';
-import { buildingService } from '../src/services/building.service';
-import { unitService } from '../src/services/unit.service';
-import { hashToken } from '../src/services/invitation.service';
+import { condominiumService } from '../src/modules/hierarchy/condominium.service';
+import { buildingService } from '../src/modules/hierarchy/building.service';
+import { unitService } from '../src/modules/hierarchy/unit.service';
+import { hashToken } from '../src/modules/invitations/invitation.service';
 
 /**
  * HTTP layer for invitation issuance (tasks 3.1–3.5). Drives the REAL Express

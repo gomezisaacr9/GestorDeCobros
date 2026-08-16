@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
-import { ConflictError, NotFoundError } from '../errors/http-errors';
-import { condominiumRepository } from '../repositories/condominium.repository';
-import { buildingService, type BuildingPublic } from '../services/building.service';
-import type { BuildingRow } from '../repositories/building.repository';
+import { ConflictError, NotFoundError } from '../../errors/http-errors';
+import { condominiumRepository } from './condominium.repository';
+import { buildingService, type BuildingPublic } from './building.service';
+import type { BuildingRow } from './building.repository';
 
 /**
  * Public building response shape — `deleted_at` is never exposed.

@@ -1,5 +1,5 @@
 import type { Knex } from 'knex';
-import connection from '../../db/connection';
+import connection from '../../../db/connection';
 
 /**
  * M:N resident ↔ unit membership. Composite PK (user_id, unit_id) is the

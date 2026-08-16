@@ -1,5 +1,5 @@
 import type { Response } from 'express';
-import { env } from '../config/env';
+import { env } from '../../config/env';
 import { signToken } from './auth.service';
 
 /**

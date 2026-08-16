@@ -1,11 +1,11 @@
 import type { Request, Response } from 'express';
-import { userRepository } from '../repositories/user.repository';
+import { userRepository } from './user.repository';
 import {
   hashPassword,
   verifyCredentials,
   verifyPassword,
-} from '../services/auth.service';
-import { sessionService } from '../services/session.service';
+} from './auth.service';
+import { sessionService } from './session.service';
 
 const UNAUTHORIZED_LOGIN = 'Credenciales inválidas';
 

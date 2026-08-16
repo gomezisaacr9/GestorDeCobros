@@ -1,18 +1,18 @@
 import { randomUUID } from 'node:crypto';
 import type { Knex } from 'knex';
-import connection from '../../db/connection';
-import { ConflictError, NotFoundError } from '../errors/http-errors';
-import { expenseRepository } from '../modules/expenses/expense.repository';
-import { paymentRepository, type PaymentRow } from '../repositories/payment.repository';
-import { residentUnitsRepository } from '../repositories/resident-units.repository';
-import { userRepository } from '../repositories/user.repository';
+import connection from '../../../db/connection';
+import { ConflictError, NotFoundError } from '../../errors/http-errors';
+import { expenseRepository } from '../expenses/expense.repository';
+import { paymentRepository, type PaymentRow } from './payment.repository';
+import { residentUnitsRepository } from '../hierarchy/resident-units.repository';
+import { userRepository } from '../auth/user.repository';
 import {
   toPublicPayment,
   toPublicReview,
   type PaymentPublic,
   type ReviewPublic,
-} from '../modules/payments/payment.schemas';
-import type { CreateActor } from '../modules/expenses/expense.service';
+} from './payment.schemas';
+import type { CreateActor } from '../expenses/expense.service';
 
 /**
  * Payment service (design D3/D5; specs R3/R4).

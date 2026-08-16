@@ -1,4 +1,4 @@
-import connection from '../../db/connection';
+import connection from '../../../db/connection';
 
 /**
  * Persisted building row. `deleted_at` is repository-internal: it never

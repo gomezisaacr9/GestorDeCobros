@@ -12,7 +12,7 @@ import os from 'node:os';
 import path from 'node:path';
 import type { AddressInfo } from 'node:net';
 import { createApp } from '../src/app';
-import { hashPassword, signToken, verifyPassword } from '../src/services/auth.service';
+import { hashPassword, signToken, verifyPassword } from '../src/modules/auth/auth.service';
 import connection from '../db/connection';
 
 const BASE = '/api/v1/auth';

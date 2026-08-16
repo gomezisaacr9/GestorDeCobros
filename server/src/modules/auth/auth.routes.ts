@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { authController } from '../controllers/auth.controller';
-import { requireAuth } from '../middlewares/requireAuth';
-import { validateZod } from '../middlewares/validateZod';
-import { LoginSchema, RotateSchema } from '../schemas/auth.schemas';
+import { authController } from './auth.controller';
+import { requireAuth } from '../../middlewares/requireAuth';
+import { validateZod } from '../../middlewares/validateZod';
+import { LoginSchema, RotateSchema } from './auth.schemas';
 
 const router = Router();
 

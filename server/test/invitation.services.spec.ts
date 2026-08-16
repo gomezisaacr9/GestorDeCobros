@@ -2,22 +2,22 @@ import { createHash, randomUUID } from 'node:crypto';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import connection from '../db/connection';
 import { migrateToLatest, wipe } from './helpers/db';
-import { condominiumService } from '../src/services/condominium.service';
-import { buildingService } from '../src/services/building.service';
-import { unitService } from '../src/services/unit.service';
-import { invitationRepository } from '../src/repositories/invitation.repository';
+import { condominiumService } from '../src/modules/hierarchy/condominium.service';
+import { buildingService } from '../src/modules/hierarchy/building.service';
+import { unitService } from '../src/modules/hierarchy/unit.service';
+import { invitationRepository } from '../src/modules/invitations/invitation.repository';
 import {
   generateToken,
   hashToken,
   invitationService,
-} from '../src/services/invitation.service';
-import { userRepository } from '../src/repositories/user.repository';
+} from '../src/modules/invitations/invitation.service';
+import { userRepository } from '../src/modules/auth/user.repository';
 import {
   ConflictError,
   GoneError,
   NotFoundError,
 } from '../src/errors/http-errors';
-import { hashPassword } from '../src/services/auth.service';
+import { hashPassword } from '../src/modules/auth/auth.service';
 
 /**
  * invitationService domain logic (task 2.9): token generation + hashing,

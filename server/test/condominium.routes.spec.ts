@@ -4,7 +4,7 @@ import express from 'express';
 import connection from '../db/connection';
 import { migrateToLatest, wipe } from './helpers/db';
 import { appRequest, signToken } from './helpers/http';
-import { condominiumRouter } from '../src/routes/condominium.routes';
+import { condominiumRouter } from '../src/modules/hierarchy/condominium.routes';
 import { errorHandler } from '../src/middlewares/errorHandler';
 
 const UUID_RE =

@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import connection from '../db/connection';
 import { migrateToLatest, wipe } from './helpers/db';
-import { condominiumRepository } from '../src/repositories/condominium.repository';
+import { condominiumRepository } from '../src/modules/hierarchy/condominium.repository';
 
 describe('condominiumRepository', () => {
   beforeAll(async () => {

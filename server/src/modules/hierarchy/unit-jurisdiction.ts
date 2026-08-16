@@ -1,5 +1,5 @@
 import type { Knex } from 'knex';
-import connection from '../../db/connection';
+import connection from '../../../db/connection';
 
 /**
  * Shared jurisdiction predicate (design D2) — ONE source of truth for the

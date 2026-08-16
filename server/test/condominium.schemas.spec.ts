@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CondominiumCreateSchema } from '../src/schemas/condominium.schemas';
+import { CondominiumCreateSchema } from '../src/modules/hierarchy/condominium.schemas';
 
 describe('CondominiumCreateSchema', () => {
   it('accepts a valid name', () => {

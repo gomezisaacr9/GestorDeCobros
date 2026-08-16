@@ -3,10 +3,10 @@ import type { Knex } from 'knex';
 import connection from '../../../db/connection';
 import { ConflictError, NotFoundError } from '../../errors/http-errors';
 import { expenseRepository } from './expense.repository';
-import { paymentRepository, type PaymentRow } from '../../repositories/payment.repository';
-import { residentUnitsRepository } from '../../repositories/resident-units.repository';
-import { findUnitInJurisdiction, type AdminRow } from '../../repositories/unit-jurisdiction';
-import { userRepository } from '../../repositories/user.repository';
+import { paymentRepository, type PaymentRow } from '../payments/payment.repository';
+import { residentUnitsRepository } from '../hierarchy/resident-units.repository';
+import { findUnitInJurisdiction, type AdminRow } from '../hierarchy/unit-jurisdiction';
+import { userRepository } from '../auth/user.repository';
 import {
   toPublicExpense,
   toPublicPanelItem,

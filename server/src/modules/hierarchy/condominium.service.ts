@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import { ConflictError } from '../errors/http-errors';
-import { condominiumRepository, type CondominiumRow } from '../repositories/condominium.repository';
+import { ConflictError } from '../../errors/http-errors';
+import { condominiumRepository, type CondominiumRow } from './condominium.repository';
 
 /**
  * Public condominium shape exposed by the API — never includes `deleted_at`.

@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
-import { ConflictError, NotFoundError } from '../errors/http-errors';
-import { buildingRepository } from '../repositories/building.repository';
-import { unitService, type UnitPublic } from '../services/unit.service';
-import type { UnitRow } from '../repositories/unit.repository';
+import { ConflictError, NotFoundError } from '../../errors/http-errors';
+import { buildingRepository } from './building.repository';
+import { unitService, type UnitPublic } from './unit.service';
+import type { UnitRow } from './unit.repository';
 
 /**
  * Public unit response shape — `deleted_at` is never exposed.

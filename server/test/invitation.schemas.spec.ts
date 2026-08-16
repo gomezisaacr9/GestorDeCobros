@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   AcceptSchema,
   InvitationCreateSchema,
-} from '../src/schemas/invitation.schemas';
+} from '../src/modules/invitations/invitation.schemas';
 
 /**
  * Schema contracts for invitation-onboarding (task 2.3): admin create body

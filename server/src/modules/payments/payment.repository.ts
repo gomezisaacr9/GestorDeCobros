@@ -1,5 +1,5 @@
 import type { Knex } from 'knex';
-import connection from '../../db/connection';
+import connection from '../../../db/connection';
 
 /**
  * Payment repository (design D1/D4/D5). Each payment records one resident

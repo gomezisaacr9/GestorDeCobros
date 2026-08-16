@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
-import { ConflictError, NotFoundError } from '../errors/http-errors';
-import { condominiumService, type CondominiumPublic } from '../services/condominium.service';
-import type { CondominiumRow } from '../repositories/condominium.repository';
+import { ConflictError, NotFoundError } from '../../errors/http-errors';
+import { condominiumService, type CondominiumPublic } from './condominium.service';
+import type { CondominiumRow } from './condominium.repository';
 
 /**
  * Public condominium response shape — `deleted_at` is never exposed.

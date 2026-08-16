@@ -4,7 +4,7 @@ import connection from '../db/connection';
 import { createApp } from '../src/app';
 import { appRequest, signToken } from './helpers/http';
 import { migrateToLatest, wipe } from './helpers/db';
-import { hashPassword } from '../src/services/auth.service';
+import { hashPassword } from '../src/modules/auth/auth.service';
 
 /**
  * Approval tests for `authController` (tasks 2.7–2.8). They capture the

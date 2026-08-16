@@ -1,11 +1,11 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import type { Knex } from 'knex';
-import connection from '../../db/connection';
-import { ConflictError, GoneError, NotFoundError } from '../errors/http-errors';
-import { invitationRepository, type AdminRow } from '../repositories/invitation.repository';
-import { residentUnitsRepository } from '../repositories/resident-units.repository';
-import { userRepository, type UserRow } from '../repositories/user.repository';
-import { hashPassword } from './auth.service';
+import connection from '../../../db/connection';
+import { ConflictError, GoneError, NotFoundError } from '../../errors/http-errors';
+import { invitationRepository, type AdminRow } from './invitation.repository';
+import { residentUnitsRepository } from '../hierarchy/resident-units.repository';
+import { userRepository, type UserRow } from '../auth/user.repository';
+import { hashPassword } from '../auth/auth.service';
 
 /**
  * Single-use magic-link invitations (design D1..D8; specs invitation-admin R1–R4,

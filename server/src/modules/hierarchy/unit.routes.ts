@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { unitController } from '../controllers/unit.controller';
-import { requireAuth } from '../middlewares/requireAuth';
-import { requireRole } from '../middlewares/requireRole';
-import { validateZod } from '../middlewares/validateZod';
-import { UnitCreateSchema } from '../schemas/unit.schemas';
+import { unitController } from './unit.controller';
+import { requireAuth } from '../../middlewares/requireAuth';
+import { requireRole } from '../../middlewares/requireRole';
+import { validateZod } from '../../middlewares/validateZod';
+import { UnitCreateSchema } from './unit.schemas';
 
 /**
  * Unit routes. Guard order per design D5: requireAuth → requireRole →

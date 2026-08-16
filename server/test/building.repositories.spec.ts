@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import connection from '../db/connection';
 import { migrateToLatest, wipe } from './helpers/db';
-import { buildingRepository } from '../src/repositories/building.repository';
+import { buildingRepository } from '../src/modules/hierarchy/building.repository';
 
 describe('buildingRepository', () => {
   beforeAll(async () => {

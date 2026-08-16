@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
-import { ConflictError, NotFoundError } from '../errors/http-errors';
-import { buildingRepository, type BuildingRow } from '../repositories/building.repository';
-import { condominiumRepository } from '../repositories/condominium.repository';
+import { ConflictError, NotFoundError } from '../../errors/http-errors';
+import { buildingRepository, type BuildingRow } from './building.repository';
+import { condominiumRepository } from './condominium.repository';
 
 /**
  * Public building shape exposed by the API — never includes `deleted_at`.

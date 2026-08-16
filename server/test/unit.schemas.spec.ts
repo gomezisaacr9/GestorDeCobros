@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { UnitCreateSchema } from '../src/schemas/unit.schemas';
+import { UnitCreateSchema } from '../src/modules/hierarchy/unit.schemas';
 
 const VALID_UUID = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 
