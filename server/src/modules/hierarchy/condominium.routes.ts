@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { buildingController } from '../controllers/building.controller';
-import { condominiumController } from '../controllers/condominium.controller';
-import { requireAuth } from '../middlewares/requireAuth';
-import { requireRole } from '../middlewares/requireRole';
-import { validateZod } from '../middlewares/validateZod';
-import { CondominiumCreateSchema } from '../schemas/condominium.schemas';
+import { buildingController } from './building.controller';
+import { condominiumController } from './condominium.controller';
+import { requireAuth } from '../../middlewares/requireAuth';
+import { requireRole } from '../../middlewares/requireRole';
+import { validateZod } from '../../middlewares/validateZod';
+import { CondominiumCreateSchema } from './condominium.schemas';
 
 /**
  * Condominium routes. Guard order per design D5: requireAuth → requireRole →

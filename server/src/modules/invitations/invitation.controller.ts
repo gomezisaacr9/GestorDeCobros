@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
-import type { AuthUser } from '../middlewares/requireAuth';
-import type { AcceptInput, InvitationCreateInput } from '../schemas/invitation.schemas';
-import { invitationService } from '../services/invitation.service';
-import { sessionService } from '../services/session.service';
+import type { AuthUser } from '../../middlewares/requireAuth';
+import type { AcceptInput, InvitationCreateInput } from './invitation.schemas';
+import { invitationService } from './invitation.service';
+import { sessionService } from '../auth/session.service';
 
 /**
  * HTTP adapter for invitation flows — deliberately thin (design: "no

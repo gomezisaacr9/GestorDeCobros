@@ -1,17 +1,17 @@
 import type { Knex } from 'knex';
-import connection from '../../db/connection';
+import connection from '../../../db/connection';
 import {
   chainQuery,
   findUnitInJurisdiction,
   type AdminRow,
   type UnitChain,
-} from './unit-jurisdiction';
+} from '../hierarchy/unit-jurisdiction';
 
 // Shared jurisdiction helper (design D2) — ONE source of truth, now defined
 // in unit-jurisdiction.ts and re-exported here so existing callers keep their
 // import path. Behavior is unchanged; the invitation green tests guard it.
-export { chainQuery, findUnitInJurisdiction } from './unit-jurisdiction';
-export type { AdminRow, UnitChain } from './unit-jurisdiction';
+export { chainQuery, findUnitInJurisdiction } from '../hierarchy/unit-jurisdiction';
+export type { AdminRow, UnitChain } from '../hierarchy/unit-jurisdiction';
 
 /**
  * Persisted invitation row. Only the SHA-256 digest (`token_hash`) is ever

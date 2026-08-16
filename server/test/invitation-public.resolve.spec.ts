@@ -3,14 +3,14 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import connection from '../db/connection';
 import { migrateToLatest, wipe } from './helpers/db';
 import { appRequest, signToken } from './helpers/http';
-import { invitationRouter } from '../src/routes/invitation.routes';
+import { invitationRouter } from '../src/modules/invitations/invitation.routes';
 import { errorHandler } from '../src/middlewares/errorHandler';
 import { createApp } from '../src/app';
-import { condominiumService } from '../src/services/condominium.service';
-import { buildingService } from '../src/services/building.service';
-import { unitService } from '../src/services/unit.service';
-import { generateToken, hashToken } from '../src/services/invitation.service';
-import { invitationRepository } from '../src/repositories/invitation.repository';
+import { condominiumService } from '../src/modules/hierarchy/condominium.service';
+import { buildingService } from '../src/modules/hierarchy/building.service';
+import { unitService } from '../src/modules/hierarchy/unit.service';
+import { generateToken, hashToken } from '../src/modules/invitations/invitation.service';
+import { invitationRepository } from '../src/modules/invitations/invitation.repository';
 
 /**
  * Public names-only resolution (tasks 3.6, part of 3.8). GET /:token MUST

@@ -1,8 +1,8 @@
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { env } from '../config/env';
-import { userRepository, type UserRow } from '../repositories/user.repository';
+import { env } from '../../config/env';
+import { userRepository, type UserRow } from './user.repository';
 
 const BCRYPT_COST = 12; // OWASP baseline; ~100–300ms per hash
 const TOKEN_TTL = '8h';

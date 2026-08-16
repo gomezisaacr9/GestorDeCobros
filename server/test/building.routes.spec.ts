@@ -5,10 +5,10 @@ import express from 'express';
 import connection from '../db/connection';
 import { migrateToLatest, wipe } from './helpers/db';
 import { appRequest, signToken } from './helpers/http';
-import { buildingRouter } from '../src/routes/building.routes';
+import { buildingRouter } from '../src/modules/hierarchy/building.routes';
 import { errorHandler } from '../src/middlewares/errorHandler';
-import { condominiumService } from '../src/services/condominium.service';
-import { unitService } from '../src/services/unit.service';
+import { condominiumService } from '../src/modules/hierarchy/condominium.service';
+import { unitService } from '../src/modules/hierarchy/unit.service';
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;

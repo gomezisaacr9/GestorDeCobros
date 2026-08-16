@@ -1,12 +1,12 @@
 import cookieParser from 'cookie-parser';
 import express from 'express';
-import authRouter from './routes/auth.routes';
-import buildingRouter from './routes/building.routes';
-import condominiumRouter from './routes/condominium.routes';
+import authRouter from './modules/auth/auth.routes';
+import buildingRouter from './modules/hierarchy/building.routes';
+import condominiumRouter from './modules/hierarchy/condominium.routes';
 import expenseRouter from './modules/expenses/expense.routes';
-import invitationRouter from './routes/invitation.routes';
-import { paymentRouter } from './routes/payment.routes';
-import unitRouter from './routes/unit.routes';
+import invitationRouter from './modules/invitations/invitation.routes';
+import { paymentRouter } from './modules/payments/payment.routes';
+import unitRouter from './modules/hierarchy/unit.routes';
 import { errorHandler } from './middlewares/errorHandler';
 
 /**

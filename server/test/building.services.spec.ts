@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import connection from '../db/connection';
 import { migrateToLatest, wipe } from './helpers/db';
-import { condominiumService } from '../src/services/condominium.service';
-import { buildingService } from '../src/services/building.service';
+import { condominiumService } from '../src/modules/hierarchy/condominium.service';
+import { buildingService } from '../src/modules/hierarchy/building.service';
 import { NotFoundError, ConflictError } from '../src/errors/http-errors';
 
 const UUID_RE =

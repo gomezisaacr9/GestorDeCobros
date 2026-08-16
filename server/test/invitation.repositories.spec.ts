@@ -2,12 +2,12 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import connection from '../db/connection';
 import { migrateToLatest, wipe } from './helpers/db';
-import { condominiumService } from '../src/services/condominium.service';
-import { buildingService } from '../src/services/building.service';
-import { unitService } from '../src/services/unit.service';
-import { invitationRepository } from '../src/repositories/invitation.repository';
-import { residentUnitsRepository } from '../src/repositories/resident-units.repository';
-import { userRepository } from '../src/repositories/user.repository';
+import { condominiumService } from '../src/modules/hierarchy/condominium.service';
+import { buildingService } from '../src/modules/hierarchy/building.service';
+import { unitService } from '../src/modules/hierarchy/unit.service';
+import { invitationRepository } from '../src/modules/invitations/invitation.repository';
+import { residentUnitsRepository } from '../src/modules/hierarchy/resident-units.repository';
+import { userRepository } from '../src/modules/auth/user.repository';
 
 /**
  * Domain-core repository layer for invitation-onboarding (PR 2 / slice 2):

@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { invitationController } from '../controllers/invitation.controller';
-import { requireAuth } from '../middlewares/requireAuth';
-import { requireRole } from '../middlewares/requireRole';
-import { validateZod } from '../middlewares/validateZod';
-import { AcceptSchema, InvitationCreateSchema } from '../schemas/invitation.schemas';
+import { invitationController } from './invitation.controller';
+import { requireAuth } from '../../middlewares/requireAuth';
+import { requireRole } from '../../middlewares/requireRole';
+import { validateZod } from '../../middlewares/validateZod';
+import { AcceptSchema, InvitationCreateSchema } from './invitation.schemas';
 
 /**
  * Invitation routes — MIXED guards per design D1:

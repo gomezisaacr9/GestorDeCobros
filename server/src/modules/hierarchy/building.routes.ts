@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { buildingController } from '../controllers/building.controller';
-import { unitController } from '../controllers/unit.controller';
-import { requireAuth } from '../middlewares/requireAuth';
-import { requireRole } from '../middlewares/requireRole';
-import { validateZod } from '../middlewares/validateZod';
-import { BuildingCreateSchema } from '../schemas/building.schemas';
+import { buildingController } from './building.controller';
+import { unitController } from './unit.controller';
+import { requireAuth } from '../../middlewares/requireAuth';
+import { requireRole } from '../../middlewares/requireRole';
+import { validateZod } from '../../middlewares/validateZod';
+import { BuildingCreateSchema } from './building.schemas';
 
 /**
  * Building routes. Guard order per design D5: requireAuth → requireRole →

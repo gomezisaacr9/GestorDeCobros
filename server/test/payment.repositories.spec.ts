@@ -3,7 +3,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import connection from '../db/connection';
 import { migrateToLatest, wipe } from './helpers/db';
 import { expenseRepository } from '../src/modules/expenses/expense.repository';
-import { paymentRepository } from '../src/repositories/payment.repository';
+import { paymentRepository } from '../src/modules/payments/payment.repository';
 
 /**
  * Payment repository (PR-1 Foundation, design D1/D4/D5): insert with

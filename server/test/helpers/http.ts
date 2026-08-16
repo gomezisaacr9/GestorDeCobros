@@ -1,7 +1,7 @@
 import type { Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import type { Express } from 'express';
-import { signToken as signAuthToken } from '../../src/services/auth.service';
+import { signToken as signAuthToken } from '../../src/modules/auth/auth.service';
 
 const COOKIE_NAME = 'auth_token';
 

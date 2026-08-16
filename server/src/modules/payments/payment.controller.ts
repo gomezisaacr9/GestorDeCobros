@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
-import type { AuthUser } from '../middlewares/requireAuth';
-import type { ExpenseReportInput, ExpenseReviewInput } from '../modules/payments/payment.schemas';
-import { paymentService } from '../services/payment.service';
+import type { AuthUser } from '../../middlewares/requireAuth';
+import type { ExpenseReportInput, ExpenseReviewInput } from './payment.schemas';
+import { paymentService } from './payment.service';
 
 /**
  * HTTP adapter for payments — deliberately thin (design: "no try/catch,

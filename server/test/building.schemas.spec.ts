@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BuildingCreateSchema } from '../src/schemas/building.schemas';
+import { BuildingCreateSchema } from '../src/modules/hierarchy/building.schemas';
 
 const VALID_UUID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 

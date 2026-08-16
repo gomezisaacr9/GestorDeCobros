@@ -4,7 +4,7 @@ import { requireAuth } from '../../middlewares/requireAuth';
 import { requireRole } from '../../middlewares/requireRole';
 import { validateZod } from '../../middlewares/validateZod';
 import { ExpenseCreateSchema } from './expense.schemas';
-import { expensePaymentsRouter } from '../../routes/payment.routes';
+import { expensePaymentsRouter } from '../payments/payment.routes';
 
 /**
  * Expense routes (design D7) — MIXED guards:

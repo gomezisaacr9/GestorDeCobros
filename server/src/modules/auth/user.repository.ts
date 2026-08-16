@@ -1,5 +1,5 @@
 import type { Knex } from 'knex';
-import connection from '../../db/connection';
+import connection from '../../../db/connection';
 
 /**
  * Persisted user row. `password_hash` and `deleted_at` are repository-internal:

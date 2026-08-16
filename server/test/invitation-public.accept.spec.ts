@@ -3,15 +3,15 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import connection from '../db/connection';
 import { migrateToLatest, wipe } from './helpers/db';
 import { appRequest } from './helpers/http';
-import { invitationRouter } from '../src/routes/invitation.routes';
+import { invitationRouter } from '../src/modules/invitations/invitation.routes';
 import { errorHandler } from '../src/middlewares/errorHandler';
 import { createApp } from '../src/app';
-import { condominiumService } from '../src/services/condominium.service';
-import { buildingService } from '../src/services/building.service';
-import { unitService } from '../src/services/unit.service';
-import { generateToken, hashToken } from '../src/services/invitation.service';
-import { invitationRepository } from '../src/repositories/invitation.repository';
-import { userRepository } from '../src/repositories/user.repository';
+import { condominiumService } from '../src/modules/hierarchy/condominium.service';
+import { buildingService } from '../src/modules/hierarchy/building.service';
+import { unitService } from '../src/modules/hierarchy/unit.service';
+import { generateToken, hashToken } from '../src/modules/invitations/invitation.service';
+import { invitationRepository } from '../src/modules/invitations/invitation.repository';
+import { userRepository } from '../src/modules/auth/user.repository';
 
 /**
  * Public accept flow (tasks 3.7 + 3.8). POST /:token/accept MUST work with NO

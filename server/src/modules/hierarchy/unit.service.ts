@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
-import { ConflictError, NotFoundError } from '../errors/http-errors';
-import { buildingRepository } from '../repositories/building.repository';
-import { unitRepository, type UnitRow } from '../repositories/unit.repository';
+import { ConflictError, NotFoundError } from '../../errors/http-errors';
+import { buildingRepository } from './building.repository';
+import { unitRepository, type UnitRow } from './unit.repository';
 
 /**
  * Public unit shape exposed by the API — never includes `deleted_at`.

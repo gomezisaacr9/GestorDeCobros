@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import connection from '../db/connection';
 import { migrateToLatest, wipe } from './helpers/db';
-import { residentUnitsRepository } from '../src/repositories/resident-units.repository';
+import { residentUnitsRepository } from '../src/modules/hierarchy/resident-units.repository';
 
 /**
  * `listUnitIdsByUser` (PR-1 Foundation, task 1.4 / design "resident-units
