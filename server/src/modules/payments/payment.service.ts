@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { Knex } from 'knex';
 import connection from '../../../db/connection';
 import { ConflictError, NotFoundError } from '../../errors/http-errors';
-import { expenseRepository } from '../expenses/expense.repository';
+import { expenseService } from '../expenses/expense.service';
 import { paymentRepository, type PaymentRow } from './payment.repository';
 import { residentUnitsRepository } from '../hierarchy/resident-units.repository';
 import { userRepository } from '../auth/user.repository';
@@ -32,7 +32,7 @@ export const paymentService = {
     expenseId: string,
     proofUrl: string,
   ): Promise<PaymentPublic> {
-    const expense = await expenseRepository.findActiveById(expenseId);
+    const expense = await expenseService.getExpenseById(expenseId);
     if (!expense) {
       throw new NotFoundError('Gasto no encontrado'); // S19 (never existed or soft-deleted)
     }
@@ -43,8 +43,8 @@ export const paymentService = {
 
     const id = randomUUID();
     let created: PaymentRow | undefined;
-    await connection.transaction(async (trx: Knex) => {
-      const affected = await expenseRepository.updateStatusGuarded(
+    await connection.transaction(async (trx: Knex.Transaction) => {
+      const affected = await expenseService.updateExpenseStatus(
         expenseId,
         ['pending', 'rejected'],
         'under_review',
@@ -104,7 +104,7 @@ export const paymentService = {
 
     const expenseId = payment.expense_id;
     let updatedAt = '';
-    await connection.transaction(async (trx: Knex) => {
+    await connection.transaction(async (trx: Knex.Transaction) => {
       // (a) guarded payment flip — exactly one `under_review → decision`.
       const payFlipped = await paymentRepository.updateStatusGuarded(paymentId, decision, trx);
       if (payFlipped === 0) {
@@ -117,7 +117,7 @@ export const paymentService = {
         throw new ConflictError('Solo puede revisarse el último pago del gasto'); // S26
       }
       // (c) guarded expense flip — mirrors the payment decision (R5).
-      const expFlipped = await expenseRepository.updateStatusGuarded(
+      const expFlipped = await expenseService.updateExpenseStatus(
         expenseId,
         ['under_review'],
         decision,

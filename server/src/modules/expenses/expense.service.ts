@@ -104,4 +104,15 @@ export const expenseService = {
       toPublicPanelItem(row, latestStatusByExpense.get(row.id) ?? null),
     );
   },
+
+  /**
+   * Public Facade Methods (Cross-Module Orchestration for Payments)
+   */
+  async getExpenseById(id: string, trx?: Knex.Transaction) {
+    return expenseRepository.findActiveById(id, trx);
+  },
+
+  async updateExpenseStatus(id: string, fromStatuses: string[], toStatus: string, trx?: Knex.Transaction): Promise<number> {
+    return expenseRepository.updateStatusGuarded(id, fromStatuses, toStatus, trx);
+  }
 };
