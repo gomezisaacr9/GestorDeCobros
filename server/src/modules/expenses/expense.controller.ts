@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
-import type { AuthUser } from '../middlewares/requireAuth';
-import type { ExpenseCreateInput } from '../schemas/expense.schemas';
-import { expenseService } from '../services/expense.service';
+import type { AuthUser } from '../../middlewares/requireAuth';
+import type { ExpenseCreateInput } from './expense.schemas';
+import { expenseService } from './expense.service';
 
 /**
  * HTTP adapter for expense emission + resident panel — deliberately thin

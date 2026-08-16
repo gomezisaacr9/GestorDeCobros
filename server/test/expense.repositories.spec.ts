@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import connection from '../db/connection';
 import { migrateToLatest, wipe } from './helpers/db';
-import { expenseRepository } from '../src/repositories/expense.repository';
+import { expenseRepository } from '../src/modules/expenses/expense.repository';
 
 /**
  * Expense repository (PR-1 Foundation, design D1/D3): insert with `pending`

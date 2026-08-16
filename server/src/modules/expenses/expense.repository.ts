@@ -1,5 +1,5 @@
 import type { Knex } from 'knex';
-import connection from '../../db/connection';
+import connection from '../../../db/connection';
 
 /**
  * Expense repository (design D1, "Key Components"). `deleted_at` is

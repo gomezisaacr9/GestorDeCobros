@@ -3,7 +3,7 @@ import { paymentController } from '../controllers/payment.controller';
 import { requireAuth } from '../middlewares/requireAuth';
 import { requireRole } from '../middlewares/requireRole';
 import { validateZod } from '../middlewares/validateZod';
-import { ExpenseReportSchema, ExpenseReviewSchema } from '../schemas/expense.schemas';
+import { ExpenseReportSchema, ExpenseReviewSchema } from '../modules/payments/payment.schemas';
 
 /**
  * Expense Payments Sub-router

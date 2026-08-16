@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
   ExpenseCreateSchema,
-  ExpenseReportSchema,
-  ExpenseReviewSchema,
   toPublicExpense,
   toPublicPanelItem,
-} from '../src/schemas/expense.schemas';
+} from '../src/modules/expenses/expense.schemas';
+import {
+  ExpenseReportSchema,
+  ExpenseReviewSchema,
+} from '../src/modules/payments/payment.schemas';
 
 /**
  * Expense schemas (PR-2, design "File Changes" → expense.schemas.ts; tasks

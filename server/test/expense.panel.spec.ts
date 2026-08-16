@@ -7,7 +7,7 @@ import { createApp } from '../src/app';
 import { condominiumService } from '../src/services/condominium.service';
 import { buildingService } from '../src/services/building.service';
 import { unitService } from '../src/services/unit.service';
-import { expenseRepository } from '../src/repositories/expense.repository';
+import { expenseRepository } from '../src/modules/expenses/expense.repository';
 
 /**
  * Resident panel (PR-2, design D5; spec R2 S10–S13). Drives the REAL app —

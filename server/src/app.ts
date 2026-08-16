@@ -3,7 +3,7 @@ import express from 'express';
 import authRouter from './routes/auth.routes';
 import buildingRouter from './routes/building.routes';
 import condominiumRouter from './routes/condominium.routes';
-import expenseRouter from './routes/expense.routes';
+import expenseRouter from './modules/expenses/expense.routes';
 import invitationRouter from './routes/invitation.routes';
 import { paymentRouter } from './routes/payment.routes';
 import unitRouter from './routes/unit.routes';

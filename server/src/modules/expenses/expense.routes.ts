@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { expenseController } from '../controllers/expense.controller';
-import { requireAuth } from '../middlewares/requireAuth';
-import { requireRole } from '../middlewares/requireRole';
-import { validateZod } from '../middlewares/validateZod';
-import { ExpenseCreateSchema } from '../schemas/expense.schemas';
-import { expensePaymentsRouter } from './payment.routes';
+import { expenseController } from './expense.controller';
+import { requireAuth } from '../../middlewares/requireAuth';
+import { requireRole } from '../../middlewares/requireRole';
+import { validateZod } from '../../middlewares/validateZod';
+import { ExpenseCreateSchema } from './expense.schemas';
+import { expensePaymentsRouter } from '../../routes/payment.routes';
 
 /**
  * Expense routes (design D7) — MIXED guards:

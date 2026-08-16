@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import type { AuthUser } from '../middlewares/requireAuth';
-import type { ExpenseReportInput, ExpenseReviewInput } from '../schemas/expense.schemas';
+import type { ExpenseReportInput, ExpenseReviewInput } from '../modules/payments/payment.schemas';
 import { paymentService } from '../services/payment.service';
 
 /**

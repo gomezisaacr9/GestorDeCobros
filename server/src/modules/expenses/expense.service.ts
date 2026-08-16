@@ -1,23 +1,19 @@
 import { randomUUID } from 'node:crypto';
 import type { Knex } from 'knex';
-import connection from '../../db/connection';
-import { ConflictError, NotFoundError } from '../errors/http-errors';
-import { expenseRepository } from '../repositories/expense.repository';
-import { paymentRepository, type PaymentRow } from '../repositories/payment.repository';
-import { residentUnitsRepository } from '../repositories/resident-units.repository';
-import { findUnitInJurisdiction, type AdminRow } from '../repositories/unit-jurisdiction';
-import { userRepository } from '../repositories/user.repository';
+import connection from '../../../db/connection';
+import { ConflictError, NotFoundError } from '../../errors/http-errors';
+import { expenseRepository } from './expense.repository';
+import { paymentRepository, type PaymentRow } from '../../repositories/payment.repository';
+import { residentUnitsRepository } from '../../repositories/resident-units.repository';
+import { findUnitInJurisdiction, type AdminRow } from '../../repositories/unit-jurisdiction';
+import { userRepository } from '../../repositories/user.repository';
 import {
   toPublicExpense,
   toPublicPanelItem,
-  toPublicPayment,
-  toPublicReview,
   type ExpenseCreateInput,
   type ExpensePublic,
-  type PaymentPublic,
   type PanelItemPublic,
-  type ReviewPublic,
-} from '../schemas/expense.schemas';
+} from './expense.schemas';
 
 /**
  * Expense service (design D3/D5; specs R1/R2). Emission follows the
