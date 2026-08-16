@@ -238,7 +238,10 @@ describe('migration 007 — invitations + resident_units + relaxed users CHECK',
     await connection('resident_units').where({ user_id: USER_MN }).del();
     await connection('users').whereIn('email', ['resident-free@gp.test', 'resident-mn@gp.test']).del();
 
-    await connection.migrate.down();
+    // migrate.down() undoes one migration per call; 008 sits on top, so this
+    // one-step-plus rolls back 008 then 007.
+    await connection.migrate.down(); // 008
+    await connection.migrate.down(); // 007
 
     expect(await connection.schema.hasTable('invitations')).toBe(false);
     expect(await connection.schema.hasTable('resident_units')).toBe(false);

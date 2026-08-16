@@ -8,17 +8,22 @@ export async function migrateToLatest(knex: Knex): Promise<void> {
 }
 
 /**
- * Wipe all hierarchy + auth tables between tests, deleting children before
- * parents so FK constraints never fire. Includes the 007 tables (task 3.9,
- * pulled forward: the domain-core specs insert invitations/resident_units).
+ * Wipe all hierarchy + auth + expenses tables between tests, deleting children
+ * before parents so FK constraints never fire. Includes the 007 tables (task
+ * 3.9) and the 008 tables (`payments` → `expenses` first — tenant-data-model
+ * delta "Test Wipe Order", part of the expenses-engine rollout).
  *
- * Order rationale (task 3.9, adjusted): `users` references all three
- * jurisdiction FKs (nullable), so it must be deleted BEFORE units/buildings/
- * condominiums; `invitations`/`resident_units` reference `users` and must go
- * first of all.
- * invitations → resident_units → users → units → buildings → condominiums.
+ * Order rationale: `payments` references `expenses` and `users`, `expenses`
+ * references `units`, so both 008 tables go before the hierarchy; `users`
+ * references all three jurisdiction FKs (nullable) and must be deleted BEFORE
+ * units/buildings/condominiums; `invitations`/`resident_units` reference
+ * `users` and go first of all.
+ * payments → expenses → invitations → resident_units → users → units →
+ * buildings → condominiums.
  */
 const FK_ORDER_TABLES = [
+  'payments',
+  'expenses',
   'invitations',
   'resident_units',
   'users',
