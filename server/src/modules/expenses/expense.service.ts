@@ -6,7 +6,7 @@ import { expenseRepository } from './expense.repository';
 import { paymentRepository, type PaymentRow } from '../payments/payment.repository';
 import { residentUnitsRepository } from '../hierarchy/resident-units.repository';
 import { findUnitInJurisdiction, type AdminRow } from '../hierarchy/unit-jurisdiction';
-import { userRepository } from '../auth/user.repository';
+import { getUserById } from '../auth/auth.service';
 import {
   toPublicExpense,
   toPublicPanelItem,
@@ -39,7 +39,7 @@ export interface CreateActor {
 export const expenseService = {
   /** Emission (R1): admin row → shared jurisdiction → pre-check → guarded insert. */
   async create(actor: CreateActor, input: ExpenseCreateInput): Promise<ExpensePublic> {
-    const admin = await userRepository.findById(actor.id);
+    const admin = await getUserById(actor.id);
     if (!admin) {
       // invitation.create pattern (D3): the actor lookup owns the 404; the
       // per-family byte-identical body is «Unidad no encontrada».
