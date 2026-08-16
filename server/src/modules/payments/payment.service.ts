@@ -4,8 +4,8 @@ import connection from '../../../db/connection';
 import { ConflictError, NotFoundError } from '../../errors/http-errors';
 import { expenseService } from '../expenses/expense.service';
 import { paymentRepository, type PaymentRow } from './payment.repository';
-import { residentUnitsRepository } from '../hierarchy/resident-units.repository';
-import { userRepository } from '../auth/user.repository';
+import { residentUnitService } from '../hierarchy/resident-unit.service';
+import { getUserById } from '../auth/auth.service';
 import {
   toPublicPayment,
   toPublicReview,
@@ -19,6 +19,10 @@ import type { CreateActor } from '../expenses/expense.service';
  * Extracted to separate concerns from expense emission.
  */
 export const paymentService = {
+  async getLatestByExpenseIds(expenseIds: string[]) {
+    return paymentRepository.latestByExpenseIds(expenseIds);
+  },
+
   /**
    * Resident payment report (R3/S14–S21, design Report flow). Membership:
    * active expense + `existsLink` — unknown / not-owned / soft-deleted ⇒
@@ -36,7 +40,7 @@ export const paymentService = {
     if (!expense) {
       throw new NotFoundError('Gasto no encontrado'); // S19 (never existed or soft-deleted)
     }
-    const owns = await residentUnitsRepository.existsLink(residentId, expense.unit_id);
+    const owns = await residentUnitService.existsLink(residentId, expense.unit_id);
     if (!owns) {
       throw new NotFoundError('Gasto no encontrado'); // S18 neighbor — byte-identical to S19
     }
@@ -96,7 +100,7 @@ export const paymentService = {
     if (actor.role !== 'superadmin') {
       // S24: condo_admin outside their condominium ⇒ the SAME 404 body as a
       // nonexistent payment (fail-closed, never 403 — spec R4).
-      const admin = await userRepository.findById(actor.id);
+      const admin = await getUserById(actor.id);
       if (!admin || admin.condominium_id !== payment.condominium_id) {
         throw new NotFoundError('Pago no encontrado');
       }
