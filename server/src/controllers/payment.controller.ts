@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import type { AuthUser } from '../middlewares/requireAuth';
 import type { ExpenseReportInput, ExpenseReviewInput } from '../schemas/expense.schemas';
-import { expenseService } from '../services/expense.service';
+import { paymentService } from '../services/payment.service';
 
 /**
  * HTTP adapter for payments — deliberately thin (design: "no try/catch,
@@ -19,7 +19,7 @@ export const paymentController = {
     const actor = req.user as AuthUser;
     const id = String(req.params.id);
     const { proof_url } = req.body as ExpenseReportInput;
-    const payment = await expenseService.reportPayment(actor.id, id, proof_url);
+    const payment = await paymentService.reportPayment(actor.id, id, proof_url);
     res.status(201).json(payment);
   },
 
@@ -28,7 +28,7 @@ export const paymentController = {
     const actor = req.user as AuthUser;
     const paymentId = String(req.params.paymentId);
     const { decision } = req.body as ExpenseReviewInput;
-    const result = await expenseService.review(paymentId, actor, decision);
+    const result = await paymentService.review(paymentId, actor, decision);
     res.status(200).json(result);
   },
 };

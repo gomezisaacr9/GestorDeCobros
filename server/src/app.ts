@@ -5,7 +5,7 @@ import buildingRouter from './routes/building.routes';
 import condominiumRouter from './routes/condominium.routes';
 import expenseRouter from './routes/expense.routes';
 import invitationRouter from './routes/invitation.routes';
-import paymentRouter from './routes/payment.routes';
+import { paymentRouter } from './routes/payment.routes';
 import unitRouter from './routes/unit.routes';
 import { errorHandler } from './middlewares/errorHandler';
 
@@ -23,11 +23,7 @@ export function createApp(): express.Express {
   app.use('/api/v1/units', unitRouter);
   app.use('/api/v1/invitations', invitationRouter);
   app.use('/api/v1/expenses', expenseRouter);
-  // paymentRouter MUST come after expenseRouter: it resolves BOTH spec URLs
-  // (POST /api/v1/expenses/:id/payments and POST /api/v1/payments/:paymentId/review)
-  // from a single mount; Express falls through the expense mount for the
-  // /expenses/:id/payments path.
-  app.use('/api/v1', paymentRouter);
+  app.use('/api/v1/payments', paymentRouter);
   app.use(errorHandler);
   return app;
 }

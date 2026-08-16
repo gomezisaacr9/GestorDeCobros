@@ -6,33 +6,32 @@ import { validateZod } from '../middlewares/validateZod';
 import { ExpenseReportSchema, ExpenseReviewSchema } from '../schemas/expense.schemas';
 
 /**
- * Payment routes (design D7 — separate router mirroring the API surface):
- * - `POST /expenses/:id/payments` (resident proof report, R3): requireAuth →
- *   requireRole resident → validateZod(ExpenseReportSchema) → controller
- *   (401 → 403 → 400, fail closed).
- * - `POST /payments/:paymentId/review` (admin review, R4): requireAuth →
- *   requireRole superadmin/condo_admin → validateZod(ExpenseReviewSchema).
- *
- * This router is mounted at `/api/v1` (see app.ts) so both spec URLs resolve:
- * `/api/v1/expenses/:id/payments` and `/api/v1/payments/:paymentId/review`.
+ * Expense Payments Sub-router
+ * Mounted at `/api/v1/expenses/:id/payments` via expenseRouter.
+ * Requires `mergeParams: true` to access `:id` from the parent router.
  */
-const router = Router();
+const expensePaymentsRouter = Router({ mergeParams: true });
 
-router.post(
-  '/expenses/:id/payments',
+expensePaymentsRouter.post(
+  '/',
   requireAuth,
   requireRole(['resident']),
   validateZod(ExpenseReportSchema),
   paymentController.report,
 );
 
-router.post(
-  '/payments/:paymentId/review',
+/**
+ * Payment Reviews Router
+ * Mounted at `/api/v1/payments`
+ */
+const paymentRouter = Router();
+
+paymentRouter.post(
+  '/:paymentId/review',
   requireAuth,
   requireRole(['superadmin', 'condo_admin']),
   validateZod(ExpenseReviewSchema),
   paymentController.review,
 );
 
-export default router;
-export { router as paymentRouter };
+export { expensePaymentsRouter, paymentRouter };

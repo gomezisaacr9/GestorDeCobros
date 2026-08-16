@@ -4,6 +4,7 @@ import { requireAuth } from '../middlewares/requireAuth';
 import { requireRole } from '../middlewares/requireRole';
 import { validateZod } from '../middlewares/validateZod';
 import { ExpenseCreateSchema } from '../schemas/expense.schemas';
+import { expensePaymentsRouter } from './payment.routes';
 
 /**
  * Expense routes (design D7) — MIXED guards:
@@ -25,6 +26,8 @@ router.post(
 );
 
 router.get('/mine', requireAuth, requireRole(['resident']), expenseController.listMine);
+
+router.use('/:id/payments', expensePaymentsRouter);
 
 export default router;
 export { router as expenseRouter };
