@@ -1,5 +1,17 @@
 import type { Knex } from 'knex';
 import connection from '../../db/connection';
+import {
+  chainQuery,
+  findUnitInJurisdiction,
+  type AdminRow,
+  type UnitChain,
+} from './unit-jurisdiction';
+
+// Shared jurisdiction helper (design D2) — ONE source of truth, now defined
+// in unit-jurisdiction.ts and re-exported here so existing callers keep their
+// import path. Behavior is unchanged; the invitation green tests guard it.
+export { chainQuery, findUnitInJurisdiction } from './unit-jurisdiction';
+export type { AdminRow, UnitChain } from './unit-jurisdiction';
 
 /**
  * Persisted invitation row. Only the SHA-256 digest (`token_hash`) is ever
@@ -17,30 +29,6 @@ export interface InvitationRow {
   deleted_at: string | null;
 }
 
-/**
- * Read-only chain projection (units ⋈ buildings ⋈ condominiums) used by both
- * resolve and accept (design D8). Names only are exposed publicly.
- */
-export interface UnitChain {
-  unit_id: string;
-  unit_number: string;
-  building_id: string;
-  building_name: string;
-  condominium_id: string;
-  condominium_name: string;
-}
-
-/**
- * Minimal admin shape consumed by the jurisdiction predicates (role + the two
- * relevant FKs). `UserRow` satisfies it structurally.
- */
-export interface AdminRow {
-  id: string;
-  role: string;
-  condominium_id: string | null;
-  building_id: string | null;
-}
-
 const INVITATION_COLUMNS = [
   'id',
   'token_hash',
@@ -52,27 +40,6 @@ const INVITATION_COLUMNS = [
   'updated_at',
   'deleted_at',
 ];
-
-const CHAIN_COLUMNS = [
-  'units.id as unit_id',
-  'units.number as unit_number',
-  'buildings.id as building_id',
-  'buildings.name as building_name',
-  'condominiums.id as condominium_id',
-  'condominiums.name as condominium_name',
-];
-
-const ADMIN_ROLES = new Set(['superadmin', 'condo_admin', 'building_admin']);
-
-function chainQuery(db: Knex) {
-  return db('units')
-    .join('buildings', 'buildings.id', 'units.building_id')
-    .join('condominiums', 'condominiums.id', 'buildings.condominium_id')
-    .select(CHAIN_COLUMNS)
-    .whereNull('units.deleted_at')
-    .whereNull('buildings.deleted_at')
-    .whereNull('condominiums.deleted_at');
-}
 
 export const invitationRepository = {
   /** Finds a non-soft-deleted invitation by token hash (trailing trx? — D2). */
@@ -93,9 +60,8 @@ export const invitationRepository = {
   },
 
   /**
-   * Jurisdiction-scoped chain lookup (design D3): superadmin → any active
-   * unit; condo_admin → units whose `buildings.condominium_id` equals the
-   * admin's; building_admin → units of its own building; unknown/cross/
+   * Jurisdiction-scoped chain lookup — delegates to the shared helper in
+   * unit-jurisdiction.ts (design D2, single source of truth). Unknown/cross/
    * soft-deleted → undefined (byte-identical 404 upstream). Fail closed:
    * any other role sees nothing.
    */
@@ -103,16 +69,7 @@ export const invitationRepository = {
     unitId: string,
     admin: AdminRow,
   ): Promise<UnitChain | undefined> {
-    if (!ADMIN_ROLES.has(admin.role)) {
-      return undefined;
-    }
-    const query = chainQuery(connection);
-    if (admin.role === 'condo_admin') {
-      query.where('condominiums.id', admin.condominium_id);
-    } else if (admin.role === 'building_admin') {
-      query.where('buildings.id', admin.building_id);
-    }
-    return query.where('units.id', unitId).first();
+    return findUnitInJurisdiction(unitId, admin);
   },
 
   /**
