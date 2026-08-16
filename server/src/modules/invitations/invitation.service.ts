@@ -3,7 +3,7 @@ import type { Knex } from 'knex';
 import connection from '../../../db/connection';
 import { ConflictError, GoneError, NotFoundError } from '../../errors/http-errors';
 import { invitationRepository, type AdminRow } from './invitation.repository';
-import { residentUnitsRepository } from '../hierarchy/resident-units.repository';
+import { residentUnitService } from '../hierarchy/resident-unit.service';
 import { getUserById, findResidentByEmail, createResident, hashPassword, type UserRow } from '../auth/auth.service';
 
 /**
@@ -164,7 +164,7 @@ export const invitationService = {
         created = true;
       }
 
-      await residentUnitsRepository.linkIfAbsent(user.id, invitation.unit_id, trx);
+      await residentUnitService.linkResidentToUnit(user.id, invitation.unit_id, trx);
       const affected = await invitationRepository.markUsed(invitation.id, trx);
       if (affected === SLEEPER_DEAD) {
         throw new ConflictError('Invitación ya utilizada'); // concurrent consume (D2)

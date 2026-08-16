@@ -4,7 +4,7 @@ import connection from '../../../db/connection';
 import { ConflictError, NotFoundError } from '../../errors/http-errors';
 import { expenseRepository } from './expense.repository';
 import { paymentRepository, type PaymentRow } from '../payments/payment.repository';
-import { residentUnitsRepository } from '../hierarchy/resident-units.repository';
+import { residentUnitService } from '../hierarchy/resident-unit.service';
 import { findUnitInJurisdiction, type AdminRow } from '../hierarchy/unit-jurisdiction';
 import { getUserById } from '../auth/auth.service';
 import {
@@ -81,7 +81,7 @@ export const expenseService = {
    * no proof_url, no deleted_at (toPublic guards).
    */
   async listMine(userId: string): Promise<PanelItemPublic[]> {
-    const unitIds = await residentUnitsRepository.listUnitIdsByUser(userId);
+    const unitIds = await residentUnitService.getUserUnitIds(userId);
     if (unitIds.length === 0) {
       return []; // S11 — zero units, no expenses query
     }
